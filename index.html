@@ -3,23 +3,101 @@
 <head>
     <title>飞行小鸟</title>
     <style>
-        canvas {
-            border: 1px solid #000;
-            display: block;
-            margin: 0 auto;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        body {
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #87CEEB;
+        }
+
+        #gameContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
+        }
+
+        #gameCanvas {
+            /* 保持原始尺寸，但允许缩放以适应屏幕 */
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            display: block;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('gameContainer');
+
+        // 保持游戏的原始尺寸
+        const GAME_WIDTH = 800;
+        const GAME_HEIGHT = 600;
+
+        function resizeCanvas() {
+            // 计算容器的尺寸
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+
+            // 计算缩放比例，保持宽高比
+            const scale = Math.min(
+                containerWidth / GAME_WIDTH,
+                containerHeight / GAME_HEIGHT
+            );
+
+            // 设置画布的CSS尺寸
+            canvas.style.width = `${GAME_WIDTH * scale}px`;
+            canvas.style.height = `${GAME_HEIGHT * scale}px`;
+
+            // 保持画布的原始分辨率
+            canvas.width = GAME_WIDTH;
+            canvas.height = GAME_HEIGHT;
+        }
+
+        // 初始化时调整大小
+        resizeCanvas();
+
+        // 监听窗口大小变化
+        window.addEventListener('resize', resizeCanvas);
+
+        // 点击进入全屏
+        document.addEventListener('click', async () => {
+            try {
+                if (!document.fullscreenElement) {
+                    await container.requestFullscreen();
+                    resizeCanvas();
+                }
+            } catch (err) {
+                console.error('全屏切换失败:', err);
+            }
+        });
+
+        // 监听全屏状态变化
+        document.addEventListener('fullscreenchange', () => {
+            resizeCanvas();
+        });
+
+        // 防止默认的触摸行为（如滚动）
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+    </script>
     <script src="game.js"></script>
 </body>
 </html> 

@@ -1,694 +1,697 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-
-// 添加调试检查
-if (!canvas) {
-    console.error('找不到 canvas 元素！');
-}
-if (!ctx) {
-    console.error('无法获取 canvas 上下文！');
-}
-
-// 添加游戏时间相关参数
-const GAME_DURATION = 5 * 60 * 1000; // 5分钟，转换为毫秒
-
-// 添加中场休息相关参数
-const HALF_TIME = GAME_DURATION / 2;  // 2.5分钟
-const BREAK_DURATION = 3000;  // 3秒休息时间
-
-// 添加星星相关常量（放在文件开头其他常量附近）
-const STAR_COUNT = 3;  // 每局游戏3个星星
-const STAR_SIZE = 30;  // 星星大小
-const STAR_SPEED = 2;  // 星星移动速度
-const SPEED_BOOST = 0.3;  // 每个星星增加30%速度
-
-// 修改商城物品列表，添加小狗道具
-const SHOP_ITEMS = [
-    {
-        id: 'shield',
-        name: '护盾',
-        price: 50,
-        description: '获得5秒无敌时间',
-        duration: 5000,
-        icon: '🛡️'
-    },
-    {
-        id: 'magnet',
-        name: '磁铁',
-        price: 30,
-        description: '15秒内自动吸引金币',
-        duration: 15000,
-        icon: '🧲'
-    },
-    {
-        id: 'dog',  // 添加小狗道具
-        name: '黑色小狗',
-        price: 60,
-        description: '跟随猫咪一起奔跑',
-        icon: '🐕'
-    },
-    {
-        id: 'life',
-        name: '生命',
-        price: 100,
-        description: '增加一条生命',
-        icon: '❤️'
+// 使用已经在 HTML 中定义的 canvas 和 ctx
+// 等待 DOM 加载完成
+window.addEventListener('DOMContentLoaded', () => {
+    // 添加调试检查
+    if (!canvas) {
+        console.error('找不到 canvas 元素！');
+        return;
     }
-];
-
-// 添加背包和皮肤相关常量
-const SKINS = [
-    {
-        id: 'default',
-        name: '默认小猫',
-        description: '可爱的小橘猫',
-        price: 0,
-        color: '#FFA500',  // 橙色
-        unlocked: true
-    },
-    {
-        id: 'black',
-        name: '黑猫咪',
-        description: '神秘的小黑猫',
-        price: 100,
-        color: '#333333',
-        unlocked: false
-    },
-    {
-        id: 'white',
-        name: '白猫咪',
-        description: '优雅的小白猫',
-        price: 100,
-        color: '#FFFFFF',
-        unlocked: false
-    },
-    {
-        id: 'grey',
-        name: '灰猫咪',
-        description: '淘气的小灰猫',
-        price: 100,
-        color: '#808080',
-        unlocked: false
-    }
-];
-
-// 修改游戏状态对象
-let gameState = {
-    isRunning: false,
-    score: 0,
-    startTime: 0,
-    timeLeft: GAME_DURATION,
-    lives: 3,
-    isInvincible: false,
-    invincibleTime: 2000,
-    frameId: null,
-    hadHalfTimeBreak: false,  // 是否已经进行过中场休息
-    isInBreak: false,          // 是否正在休息
-    coins: 0,        // 金币数量（直接用于购买道具）
-    activeItems: [],   // 激活的道具
-    showShop: false,    // 商城显示状态
-    isPaused: false,     // 暂停状态
-    gameCoins: 0,    // 游戏中收集的金币
-    shopCoins: 0,    // 商城中的金币
-    wasRunning: false,  // 添加新属性，记录商城打开前的游戏状态
-    lastGameWon: false,    // 记录上一局是否胜利
-    speedMultiplier: 1,    // 游戏速度倍数
-    currentLevel: 1,        // 添加当前关卡记录
-    stars: [],            // 星星数组
-    totalStarsGenerated: 0,  // 添加总星星计数
-    speedBoosts: 0,        // 当前获得的加速数量
-    notifications: [],      // 添加通知数组
-    showBag: false,        // 背包显示状态
-    currentSkin: 'default', // 当前使用的皮肤
-    unlockedSkins: ['default'],  // 已解锁的皮肤
-    inventory: []  // 添加背包
-};
-
-// 添加声音效果
-const sounds = {
-    jump: new Audio('data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAAABkYXRhAAAAAA=='),
-    score: new Audio('data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAAABkYXRhAAAAAA=='),
-    hit: new Audio('data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAAABkYXRhAAAAAA=='),
-    meow: new Audio('data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAAABkYXRhAAAAAA==')
-};
-
-// 加载声音文件
-sounds.jump.src = 'https://example.com/jump.mp3';  // 跳跃音效
-sounds.score.src = 'https://example.com/score.mp3'; // 得分音效
-sounds.hit.src = 'https://example.com/hit.mp3';    // 碰撞音效
-sounds.meow.src = 'https://example.com/meow.mp3';  // 喵喵音效
-
-// 加载小鸟图片
-const birdImage = new Image();
-birdImage.src = 'bird.png';  // 如果您没有图片，我们使用绘制的小鸟
-
-// 小鸟对象
-const cat = {
-    x: canvas.width / 3,
-    y: canvas.height / 2,
-    velocity: 0,
-    baseGravity: 0.3,     // 基础重力
-    baseJump: -7,         // 基础跳跃力度
-    width: 80,
-    height: 80,
-    rotation: 0,
-    isJumping: false,
-    tailAngle: 0,
-    tailSpeed: 0.15,
-    legAngle: 0,
-    legSpeed: 0.3
-};
-
-// 修改障碍物数组的结构
-let boxes = [];  // 改名为 boxes 更合适
-
-// 障碍物参数
-const PIPE_WIDTH = 70;       // 减小箱子宽度
-const PIPE_GAP = 200;       // 减小间隙
-const PIPE_SPEED = 2;       // 降低速度
-const BOX_COUNT = 2;        // 减少箱子数量
-
-// 添加云朵数组和太阳对象
-const clouds = [
-    { x: 100, y: 100, size: 60 },
-    { x: 400, y: 150, size: 80 }  // 减少云朵数量
-];
-
-const sun = {
-    x: 120,
-    y: 120,
-    radius: 50,
-    rays: 12
-};
-
-// 调整草地高度
-const grassHeight = 120;
-
-// 添加箱子的纹理颜色
-const boxColors = {
-    main: '#8B4513',      // 深棕色（箱子主体）
-    light: '#D2691E',     // 浅棕色（高光面）
-    dark: '#654321',      // 暗棕色（阴影面）
-    metal: '#C0C0C0'      // 银色（金属装饰）
-};
-
-// 添加金币数组和相关参数
-let coins = [];
-const COIN_SIZE = 30;       // 减小金币大小
-const COIN_SPEED = 2;       // 匹配箱子速度
-const COIN_SCORE = 10;      // 增加金币分数
-const COIN_COUNT = 2;       // 减少金币数量
-
-// 添加金币动画参数
-const coinAnimation = {
-    rotation: 0,
-    rotationSpeed: 0.1,
-    bounceHeight: 5,
-    bounceSpeed: 0.05
-};
-
-// 添加本地存储相关函数
-function saveShopCoins() {
-    localStorage.setItem('shopCoins', gameState.shopCoins);
-}
-
-function loadShopCoins() {
-    const savedCoins = localStorage.getItem('shopCoins');
-    return savedCoins ? parseInt(savedCoins) : 0;
-}
-
-// 修改游戏状态对象，添加基础速度常量
-const BASE_SPEED = 1;        // 基础速度
-const LEVEL_SPEED_UP = 0.5;  // 每关速度增加值
-
-// 添加小狗对象
-const dog = {
-    active: false,
-    x: 0,
-    y: 0,
-    width: 60,
-    height: 60,
-    targetX: 0,
-    targetY: 0,
-    legAngle: 0,
-    legSpeed: 0.3
-};
-
-// 添加皮肤保存函数
-function saveSkins() {
-    localStorage.setItem('unlockedSkins', JSON.stringify(gameState.unlockedSkins));
-    localStorage.setItem('currentSkin', gameState.currentSkin);
-}
-
-// 添加皮肤加载函数
-function loadSkins() {
-    const savedUnlockedSkins = localStorage.getItem('unlockedSkins');
-    const savedCurrentSkin = localStorage.getItem('currentSkin');
-    
-    if (savedUnlockedSkins) {
-        gameState.unlockedSkins = JSON.parse(savedUnlockedSkins);
-    } else {
-        gameState.unlockedSkins = ['default'];
-    }
-    
-    if (savedCurrentSkin && gameState.unlockedSkins.includes(savedCurrentSkin)) {
-        gameState.currentSkin = savedCurrentSkin;
-    } else {
-        gameState.currentSkin = 'default';
-    }
-}
-
-// 修改初始化函数
-function init() {
-    gameState.isRunning = true;
-    gameState.score = 0;
-    gameState.startTime = Date.now();
-    gameState.timeLeft = GAME_DURATION;
-    gameState.lives = 3;
-    gameState.isInvincible = false;
-    
-    cat.x = canvas.width / 3;
-    cat.y = canvas.height / 2;
-    cat.velocity = 0;
-    cat.isJumping = false;
-    boxes = [];
-    generateBoxes();
-    coins = [];
-    generateCoins();
-    sounds.meow.play();
-    gameState.hadHalfTimeBreak = false;
-    gameState.isInBreak = false;
-    gameState.isPaused = false;
-    gameState.showShop = false;
-    gameState.showBag = false;
-    gameState.coins = 0;
-    gameState.gameCoins = 35;  // 开局给35个游戏币
-    gameState.shopCoins = loadShopCoins();  // 加载保存的商城币
-    gameState.wasRunning = false;
-    gameState.stars = [];
-    gameState.totalStarsGenerated = 0;  // 重置星星计数
-    gameState.speedBoosts = 0;
-    gameState.speedMultiplier = BASE_SPEED;
-    gameState.lastGameWon = false;
-    gameState.currentLevel = 1;
-    generateStars();
-    gameState.showBag = false;
-    gameState.currentSkin = 'default';
-    gameState.unlockedSkins = ['default'];
-
-    // 根据上一局结果设置速度
-    if (gameState.lastGameWon) {
-        // 如果上一局胜利，速度增加0.5
-        gameState.speedMultiplier = BASE_SPEED + LEVEL_SPEED_UP;
-    } else {
-        // 如果失败，重置速度
-        gameState.speedMultiplier = BASE_SPEED;
-        gameState.currentLevel = 1;
-    }
-
-    // 加载已保存的皮肤数据
-    loadSkins();
-}
-
-// 修改生成箱子的函数
-function generateBoxes() {
-    if (boxes.length >= BOX_COUNT) return;  // 限制箱子数量
-    
-    const boxCount = BOX_COUNT - boxes.length;
-    const boxGroup = [];
-    
-    // 将画面水平方向分成几个区域
-    const sections = [
-        { min: canvas.width + 50, max: canvas.width + 150 },
-        { min: canvas.width + 250, max: canvas.width + 350 },
-        { min: canvas.width + 450, max: canvas.width + 550 },
-        { min: canvas.width + 650, max: canvas.width + 750 }
-    ];
-
-    // 将垂直方向分成三个区域
-    const heightZones = [
-        { min: 100, max: canvas.height * 0.3 },                   // 上部区域
-        { min: canvas.height * 0.35, max: canvas.height * 0.6 },  // 中部区域
-        { min: canvas.height * 0.65, max: canvas.height - grassHeight - PIPE_WIDTH - 50 } // 下部区域
-    ];
-
-    // 随机选择不重叠的区域放置箱子
-    const usedSections = [];
-    const usedHeights = [];
-
-    for(let i = 0; i < boxCount; i++) {
-        // 选择水平区域
-        let sectionIndex;
-        do {
-            sectionIndex = Math.floor(Math.random() * sections.length);
-        } while (usedSections.includes(sectionIndex));
-        usedSections.push(sectionIndex);
-        
-        // 选择垂直区域
-        let heightIndex;
-        do {
-            heightIndex = Math.floor(Math.random() * heightZones.length);
-        } while (usedHeights.includes(heightIndex));
-        usedHeights.push(heightIndex);
-
-        const section = sections[sectionIndex];
-        const heightZone = heightZones[heightIndex];
-
-        // 在选定区域内随机生成箱子的位置
-        const x = Math.random() * (section.max - section.min) + section.min;
-        const y = Math.random() * (heightZone.max - heightZone.min) + heightZone.min;
-        
-        boxGroup.push({
-            x: x,
-            y: y,
-            width: PIPE_WIDTH,
-            height: PIPE_WIDTH,
-            passed: false
-        });
-    }
-    
-    boxes.push(...boxGroup);
-}
-
-// 生成金币的函数
-function generateCoins() {
-    if (coins.length >= COIN_COUNT) return;  // 限制金币数量
-    
-    const coinCount = COIN_COUNT - coins.length;
-    // 在箱子之间生成金币
-    
-    // 将画面分成几个区域
-    const sections = [
-        { min: canvas.width + 200, max: canvas.width + 300 },
-        { min: canvas.width + 400, max: canvas.width + 500 },
-        { min: canvas.width + 600, max: canvas.width + 700 }
-    ];
-
-    const heightZones = [
-        { min: 150, max: canvas.height * 0.4 },
-        { min: canvas.height * 0.4, max: canvas.height * 0.7 }
-    ];
-
-    // 生成金币
-    for(let i = 0; i < coinCount; i++) {
-        const section = sections[Math.floor(Math.random() * sections.length)];
-        const heightZone = heightZones[Math.floor(Math.random() * heightZones.length)];
-        
-        coins.push({
-            x: Math.random() * (section.max - section.min) + section.min,
-            y: Math.random() * (heightZone.max - heightZone.min) + heightZone.min,
-            size: COIN_SIZE,
-            collected: false,
-            bounceOffset: Math.random() * Math.PI * 2  // 随机初始弹跳相位
-        });
-    }
-}
-
-// 修改更新函数
-function update() {
-    if (!gameState.isRunning || gameState.isInBreak) return;
-
-    // 检查是否到达中场时间
-    if (!gameState.hadHalfTimeBreak && gameState.timeLeft <= HALF_TIME) {
-        startHalfTimeBreak();
+    if (!ctx) {
+        console.error('无法获取 canvas 上下文！');
         return;
     }
 
-    // 根据当前速度调整重力和跳跃力度
-    const currentGravity = cat.baseGravity * (gameState.speedMultiplier ** 2);  // 使用平方关系
-    cat.velocity += currentGravity;
-    cat.y += cat.velocity;
+    // 初始化游戏
+    initGame();
+});
 
-    // 简化碰撞检测
-    const groundY = canvas.height - grassHeight - cat.height/2;
-    if (cat.y > groundY) {
-        cat.y = groundY;
+function initGame() {
+    // 游戏配置和常量
+    const GAME_DURATION = 5 * 60 * 1000; // 5分钟
+    const HALF_TIME = GAME_DURATION / 2;  // 2.5分钟
+    const BREAK_DURATION = 3000;  // 3秒休息时间
+
+    // 星星相关常量
+    const STAR_COUNT = 3;
+    const STAR_SIZE = 30;
+    const STAR_SPEED = 2;
+    const SPEED_BOOST = 0.3;
+
+    // 障碍物参数
+    const PIPE_WIDTH = 70;
+    const PIPE_GAP = 200;
+    const PIPE_SPEED = 2;
+    const BOX_COUNT = 2;
+
+    // 商城物品列表
+    const SHOP_ITEMS = [
+        {
+            id: 'shield',
+            name: '护盾',
+            price: 50,
+            description: '获得5秒无敌时间',
+            duration: 5000,
+            icon: '🛡️'
+        },
+        {
+            id: 'magnet',
+            name: '磁铁',
+            price: 30,
+            description: '15秒内自动吸引金币',
+            duration: 15000,
+            icon: '🧲'
+        },
+        {
+            id: 'dog',
+            name: '黑色小狗',
+            price: 60,
+            description: '跟随猫咪一起奔跑',
+            icon: '🐕'
+        },
+        {
+            id: 'life',
+            name: '生命',
+            price: 100,
+            description: '增加一条生命',
+            icon: '❤️'
+        }
+    ];
+
+    // 皮肤相关常量
+    const SKINS = [
+        {
+            id: 'default',
+            name: '默认小猫',
+            description: '可爱的小橘猫',
+            price: 0,
+            color: '#FFA500',  // 橙色
+            unlocked: true
+        },
+        {
+            id: 'black',
+            name: '黑猫咪',
+            description: '神秘的小黑猫',
+            price: 100,
+            color: '#333333',
+            unlocked: false
+        },
+        {
+            id: 'white',
+            name: '白猫咪',
+            description: '优雅的小白猫',
+            price: 100,
+            color: '#FFFFFF',
+            unlocked: false
+        },
+        {
+            id: 'grey',
+            name: '灰猫咪',
+            description: '淘气的小灰猫',
+            price: 100,
+            color: '#808080',
+            unlocked: false
+        }
+    ];
+
+    // 游戏状态对象
+    let gameState = {
+        isRunning: false,
+        score: 0,
+        startTime: 0,
+        timeLeft: GAME_DURATION,
+        lives: 3,
+        isInvincible: false,
+        invincibleTime: 2000,
+        frameId: null,
+        hadHalfTimeBreak: false,  // 是否已经进行过中场休息
+        isInBreak: false,          // 是否正在休息
+        coins: 0,        // 金币数量（直接用于购买道具）
+        activeItems: [],   // 激活的道具
+        showShop: false,    // 商城显示状态
+        isPaused: false,     // 暂停状态
+        gameCoins: 0,    // 游戏中收集的金币
+        shopCoins: 0,    // 商城中的金币
+        wasRunning: false,  // 添加新属性，记录商城打开前的游戏状态
+        lastGameWon: false,    // 记录上一局是否胜利
+        speedMultiplier: 1,    // 游戏速度倍数
+        currentLevel: 1,        // 添加当前关卡记录
+        stars: [],            // 星星数组
+        totalStarsGenerated: 0,  // 添加总星星计数
+        speedBoosts: 0,        // 当前获得的加速数量
+        notifications: [],      // 添加通知数组
+        showBag: false,        // 背包显示状态
+        currentSkin: 'default', // 当前使用的皮肤
+        unlockedSkins: ['default'],  // 已解锁的皮肤
+        inventory: []  // 添加背包
+    };
+
+    // 声音效果（等待用户交互后再加载）
+    const sounds = {
+        jump: new Audio(),
+        score: new Audio(),
+        hit: new Audio(),
+        meow: new Audio()
+    };
+
+    // 加载小鸟图片
+    const birdImage = new Image();
+    birdImage.src = 'bird.png';  // 如果您没有图片，我们使用绘制的小鸟
+
+    // 小鸟对象
+    const cat = {
+        x: canvas.width / 3,
+        y: canvas.height / 2,
+        velocity: 0,
+        baseGravity: 0.3,     // 基础重力
+        baseJump: -7,         // 基础跳跃力度
+        width: 80,
+        height: 80,
+        rotation: 0,
+        isJumping: false,
+        tailAngle: 0,
+        tailSpeed: 0.15,
+        legAngle: 0,
+        legSpeed: 0.3
+    };
+
+    // 修改障碍物数组的结构
+    let boxes = [];  // 改名为 boxes 更合适
+
+    // 添加云朵数组和太阳对象
+    const clouds = [
+        { x: 100, y: 100, size: 60 },
+        { x: 400, y: 150, size: 80 }  // 减少云朵数量
+    ];
+
+    const sun = {
+        x: 120,
+        y: 120,
+        radius: 50,
+        rays: 12
+    };
+
+    // 调整草地高度
+    const grassHeight = 120;
+
+    // 添加箱子的纹理颜色
+    const boxColors = {
+        main: '#8B4513',      // 深棕色（箱子主体）
+        light: '#D2691E',     // 浅棕色（高光面）
+        dark: '#654321',      // 暗棕色（阴影面）
+        metal: '#C0C0C0'      // 银色（金属装饰）
+    };
+
+    // 添加金币数组和相关参数
+    let coins = [];
+    const COIN_SIZE = 30;       // 减小金币大小
+    const COIN_SPEED = 2;       // 匹配箱子速度
+    const COIN_SCORE = 10;      // 增加金币分数
+    const COIN_COUNT = 2;       // 减少金币数量
+
+    // 添加金币动画参数
+    const coinAnimation = {
+        rotation: 0,
+        rotationSpeed: 0.1,
+        bounceHeight: 5,
+        bounceSpeed: 0.05
+    };
+
+    // 添加本地存储相关函数
+    function saveShopCoins() {
+        localStorage.setItem('shopCoins', gameState.shopCoins);
+    }
+
+    function loadShopCoins() {
+        const savedCoins = localStorage.getItem('shopCoins');
+        return savedCoins ? parseInt(savedCoins) : 0;
+    }
+
+    // 修改游戏状态对象，添加基础速度常量
+    const BASE_SPEED = 1;        // 基础速度
+    const LEVEL_SPEED_UP = 0.5;  // 每关速度增加值
+
+    // 添加小狗对象
+    const dog = {
+        active: false,
+        x: 0,
+        y: 0,
+        width: 60,
+        height: 60,
+        targetX: 0,
+        targetY: 0,
+        legAngle: 0,
+        legSpeed: 0.3
+    };
+
+    // 添加皮肤保存函数
+    function saveSkins() {
+        localStorage.setItem('unlockedSkins', JSON.stringify(gameState.unlockedSkins));
+        localStorage.setItem('currentSkin', gameState.currentSkin);
+    }
+
+    // 添加皮肤加载函数
+    function loadSkins() {
+        const savedUnlockedSkins = localStorage.getItem('unlockedSkins');
+        const savedCurrentSkin = localStorage.getItem('currentSkin');
+        
+        if (savedUnlockedSkins) {
+            gameState.unlockedSkins = JSON.parse(savedUnlockedSkins);
+        } else {
+            gameState.unlockedSkins = ['default'];
+        }
+        
+        if (savedCurrentSkin && gameState.unlockedSkins.includes(savedCurrentSkin)) {
+            gameState.currentSkin = savedCurrentSkin;
+        } else {
+            gameState.currentSkin = 'default';
+        }
+    }
+
+    // 修改初始化函数
+    function init() {
+        gameState.isRunning = true;
+        gameState.score = 0;
+        gameState.startTime = Date.now();
+        gameState.timeLeft = GAME_DURATION;
+        gameState.lives = 3;
+        gameState.isInvincible = false;
+        
+        cat.x = canvas.width / 3;
+        cat.y = canvas.height / 2;
         cat.velocity = 0;
         cat.isJumping = false;
-    }
+        boxes = [];
+        generateBoxes();
+        coins = [];
+        generateCoins();
+        sounds.meow.play();
+        gameState.hadHalfTimeBreak = false;
+        gameState.isInBreak = false;
+        gameState.isPaused = false;
+        gameState.showShop = false;
+        gameState.showBag = false;
+        gameState.coins = 0;
+        gameState.gameCoins = 35;  // 开局给35个游戏币
+        gameState.shopCoins = loadShopCoins();  // 加载保存的商城币
+        gameState.wasRunning = false;
+        gameState.stars = [];
+        gameState.totalStarsGenerated = 0;  // 重置星星计数
+        gameState.speedBoosts = 0;
+        gameState.speedMultiplier = BASE_SPEED;
+        gameState.lastGameWon = false;
+        gameState.currentLevel = 1;
+        generateStars();
+        gameState.showBag = false;
+        gameState.currentSkin = 'default';
+        gameState.unlockedSkins = ['default'];
 
-    // 天花板碰撞检测
-    if (cat.y < cat.height/2) {
-        cat.y = cat.height/2;
-        cat.velocity = 0;
-    }
-
-    // 优化箱子更新
-    for (let i = boxes.length - 1; i >= 0; i--) {
-        const box = boxes[i];
-        box.x -= PIPE_SPEED * gameState.speedMultiplier;
-        
-        if (box.x + box.width < -50) {
-            boxes.splice(i, 1);
-            continue;
+        // 根据上一局结果设置速度
+        if (gameState.lastGameWon) {
+            // 如果上一局胜利，速度增加0.5
+            gameState.speedMultiplier = BASE_SPEED + LEVEL_SPEED_UP;
+        } else {
+            // 如果失败，重置速度
+            gameState.speedMultiplier = BASE_SPEED;
+            gameState.currentLevel = 1;
         }
 
-        if (!box.passed && box.x + box.width < cat.x) {
-            box.passed = true;
-            gameState.gameCoins += 5;  // 通过箱子也获得5个游戏币
+        // 加载已保存的皮肤数据
+        loadSkins();
+    }
+
+    // 修改生成箱子的函数
+    function generateBoxes() {
+        if (boxes.length >= BOX_COUNT) return;  // 限制箱子数量
+        
+        const boxCount = BOX_COUNT - boxes.length;
+        const boxGroup = [];
+        
+        // 将画面水平方向分成几个区域
+        const sections = [
+            { min: canvas.width + 50, max: canvas.width + 150 },
+            { min: canvas.width + 250, max: canvas.width + 350 },
+            { min: canvas.width + 450, max: canvas.width + 550 },
+            { min: canvas.width + 650, max: canvas.width + 750 }
+        ];
+
+        // 将垂直方向分成三个区域
+        const heightZones = [
+            { min: 100, max: canvas.height * 0.3 },                   // 上部区域
+            { min: canvas.height * 0.35, max: canvas.height * 0.6 },  // 中部区域
+            { min: canvas.height * 0.65, max: canvas.height - grassHeight - PIPE_WIDTH - 50 } // 下部区域
+        ];
+
+        // 随机选择不重叠的区域放置箱子
+        const usedSections = [];
+        const usedHeights = [];
+
+        for(let i = 0; i < boxCount; i++) {
+            // 选择水平区域
+            let sectionIndex;
+            do {
+                sectionIndex = Math.floor(Math.random() * sections.length);
+            } while (usedSections.includes(sectionIndex));
+            usedSections.push(sectionIndex);
             
-            // 检查是否需要自动兑换
-            if (gameState.gameCoins >= 50) {
-                gameState.gameCoins -= 50;
-                gameState.shopCoins += 10;
-                saveShopCoins();
-                showExchangeNotification();
-                sounds.score.play();
-            } else {
-                sounds.score.play();
+            // 选择垂直区域
+            let heightIndex;
+            do {
+                heightIndex = Math.floor(Math.random() * heightZones.length);
+            } while (usedHeights.includes(heightIndex));
+            usedHeights.push(heightIndex);
+
+            const section = sections[sectionIndex];
+            const heightZone = heightZones[heightIndex];
+
+            // 在选定区域内随机生成箱子的位置
+            const x = Math.random() * (section.max - section.min) + section.min;
+            const y = Math.random() * (heightZone.max - heightZone.min) + heightZone.min;
+            
+            boxGroup.push({
+                x: x,
+                y: y,
+                width: PIPE_WIDTH,
+                height: PIPE_WIDTH,
+                passed: false
+            });
+        }
+        
+        boxes.push(...boxGroup);
+    }
+
+    // 生成金币的函数
+    function generateCoins() {
+        if (coins.length >= COIN_COUNT) return;  // 限制金币数量
+        
+        const coinCount = COIN_COUNT - coins.length;
+        // 在箱子之间生成金币
+        
+        // 将画面分成几个区域
+        const sections = [
+            { min: canvas.width + 200, max: canvas.width + 300 },
+            { min: canvas.width + 400, max: canvas.width + 500 },
+            { min: canvas.width + 600, max: canvas.width + 700 }
+        ];
+
+        const heightZones = [
+            { min: 150, max: canvas.height * 0.4 },
+            { min: canvas.height * 0.4, max: canvas.height * 0.7 }
+        ];
+
+        // 生成金币
+        for(let i = 0; i < coinCount; i++) {
+            const section = sections[Math.floor(Math.random() * sections.length)];
+            const heightZone = heightZones[Math.floor(Math.random() * heightZones.length)];
+            
+            coins.push({
+                x: Math.random() * (section.max - section.min) + section.min,
+                y: Math.random() * (heightZone.max - heightZone.min) + heightZone.min,
+                size: COIN_SIZE,
+                collected: false,
+                bounceOffset: Math.random() * Math.PI * 2  // 随机初始弹跳相位
+            });
+        }
+    }
+
+    // 修改更新函数
+    function update() {
+        if (!gameState.isRunning || gameState.isInBreak) return;
+
+        // 检查是否到达中场时间
+        if (!gameState.hadHalfTimeBreak && gameState.timeLeft <= HALF_TIME) {
+            startHalfTimeBreak();
+            return;
+        }
+
+        // 根据当前速度调整重力和跳跃力度
+        const currentGravity = cat.baseGravity * (gameState.speedMultiplier ** 2);  // 使用平方关系
+        cat.velocity += currentGravity;
+        cat.y += cat.velocity;
+
+        // 简化碰撞检测
+        const groundY = canvas.height - grassHeight - cat.height/2;
+        if (cat.y > groundY) {
+            cat.y = groundY;
+            cat.velocity = 0;
+            cat.isJumping = false;
+        }
+
+        // 天花板碰撞检测
+        if (cat.y < cat.height/2) {
+            cat.y = cat.height/2;
+            cat.velocity = 0;
+        }
+
+        // 优化箱子更新
+        for (let i = boxes.length - 1; i >= 0; i--) {
+            const box = boxes[i];
+            box.x -= PIPE_SPEED * gameState.speedMultiplier;
+            
+            if (box.x + box.width < -50) {
+                boxes.splice(i, 1);
+                continue;
+            }
+
+            if (!box.passed && box.x + box.width < cat.x) {
+                box.passed = true;
+                gameState.gameCoins += 5;  // 通过箱子也获得5个游戏币
+                
+                // 检查是否需要自动兑换
+                if (gameState.gameCoins >= 50) {
+                    gameState.gameCoins -= 50;
+                    gameState.shopCoins += 10;
+                    saveShopCoins();
+                    showExchangeNotification();
+                    sounds.score.play();
+                } else {
+                    sounds.score.play();
+                }
+            }
+
+            // 添加箱子碰撞检测
+            if (checkCollision(box)) {
+                gameOver();
             }
         }
 
-        // 添加箱子碰撞检测
-        if (checkCollision(box)) {
-            gameOver();
+        // 优化金币更新
+        for (let i = coins.length - 1; i >= 0; i--) {
+            const coin = coins[i];
+            coin.x -= COIN_SPEED * gameState.speedMultiplier;
+            
+            // 恢复金币碰撞检测
+            if (!coin.collected && checkCoinCollision(coin)) {
+                coin.collected = true;
+                gameState.score += COIN_SCORE;
+                sounds.score.play();
+            }
+            
+            if (coin.x + coin.size < -50 || coin.collected) {
+                coins.splice(i, 1);
+                continue;
+            }
+        }
+
+        // 更新星星
+        for (let i = gameState.stars.length - 1; i >= 0; i--) {
+            const star = gameState.stars[i];
+            star.x -= STAR_SPEED * gameState.speedMultiplier;
+            
+            // 检查星星碰撞
+            if (!star.collected && checkStarCollision(star)) {
+                star.collected = true;
+                gameState.speedBoosts++;
+                gameState.speedMultiplier += SPEED_BOOST;  // 增加速度
+                sounds.score.play();
+            }
+            
+            if (star.x + star.size < -50 || star.collected) {
+                gameState.stars.splice(i, 1);
+            }
+        }
+
+        // 生成新的星星
+        generateStars();
+
+        // 按需生成新的箱子和金币
+        if (boxes.length < BOX_COUNT) generateBoxes();
+        if (coins.length < COIN_COUNT) generateCoins();
+
+        // 简化动画更新
+        coinAnimation.rotation = (coinAnimation.rotation + coinAnimation.rotationSpeed) % (Math.PI * 2);
+
+        // 更新小狗位置
+        if (dog.active) {
+            // 设置目标位置在猫咪后面
+            dog.targetX = cat.x - 100;
+            dog.targetY = cat.y;
+
+            // 平滑移动到目标位置
+            const dx = dog.targetX - dog.x;
+            const dy = dog.targetY - dog.y;
+            dog.x += dx * 0.1;
+            dog.y += dy * 0.1;
+
+            // 更新腿部动画
+            dog.legAngle += dog.legSpeed;
         }
     }
 
-    // 优化金币更新
-    for (let i = coins.length - 1; i >= 0; i--) {
-        const coin = coins[i];
-        coin.x -= COIN_SPEED * gameState.speedMultiplier;
-        
-        // 恢复金币碰撞检测
-        if (!coin.collected && checkCoinCollision(coin)) {
-            coin.collected = true;
-            gameState.score += COIN_SCORE;
-            sounds.score.play();
+    // 修改碰撞检测
+    function checkCollision(box) {
+        if (gameState.isInvincible) return false;  // 无敌状态下不检测碰撞
+
+        const catHitbox = {
+            left: cat.x - cat.width/3,
+            right: cat.x + cat.width/3,
+            top: cat.y - cat.height/3,
+            bottom: cat.y + cat.height/3
+        };
+
+        const boxHitbox = {
+            left: box.x,
+            right: box.x + box.width,
+            top: box.y,
+            bottom: box.y + box.height
+        };
+
+        if (catHitbox.right > boxHitbox.left && 
+            catHitbox.left < boxHitbox.right && 
+            catHitbox.bottom > boxHitbox.top && 
+            catHitbox.top < boxHitbox.bottom) {
+            
+            if (gameState.lives > 0) {
+                handleCollision();
+                return false;  // 不结束游戏
+            }
+            sounds.hit.play();
+            return true;  // 生命值为0时结束游戏
         }
-        
-        if (coin.x + coin.size < -50 || coin.collected) {
-            coins.splice(i, 1);
-            continue;
-        }
+        return false;
     }
 
-    // 更新星星
-    for (let i = gameState.stars.length - 1; i >= 0; i--) {
-        const star = gameState.stars[i];
-        star.x -= STAR_SPEED * gameState.speedMultiplier;
-        
-        // 检查星星碰撞
-        if (!star.collected && checkStarCollision(star)) {
-            star.collected = true;
-            gameState.speedBoosts++;
-            gameState.speedMultiplier += SPEED_BOOST;  // 增加速度
-            sounds.score.play();
-        }
-        
-        if (star.x + star.size < -50 || star.collected) {
-            gameState.stars.splice(i, 1);
-        }
+    // 金币碰撞检测
+    function checkCoinCollision(coin) {
+        const catHitbox = {
+            left: cat.x - cat.width/3,
+            right: cat.x + cat.width/3,
+            top: cat.y - cat.height/3,
+            bottom: cat.y + cat.height/3
+        };
+
+        const coinHitbox = {
+            left: coin.x - coin.size/2,
+            right: coin.x + coin.size/2,
+            top: coin.y - coin.size/2,
+            bottom: coin.y + coin.size/2
+        };
+
+        return catHitbox.right > coinHitbox.left && 
+               catHitbox.left < coinHitbox.right && 
+               catHitbox.bottom > coinHitbox.top && 
+               catHitbox.top < coinHitbox.bottom;
     }
 
-    // 生成新的星星
-    generateStars();
-
-    // 按需生成新的箱子和金币
-    if (boxes.length < BOX_COUNT) generateBoxes();
-    if (coins.length < COIN_COUNT) generateCoins();
-
-    // 简化动画更新
-    coinAnimation.rotation = (coinAnimation.rotation + coinAnimation.rotationSpeed) % (Math.PI * 2);
-
-    // 更新小狗位置
-    if (dog.active) {
-        // 设置目标位置在猫咪后面
-        dog.targetX = cat.x - 100;
-        dog.targetY = cat.y;
-
-        // 平滑移动到目标位置
-        const dx = dog.targetX - dog.x;
-        const dy = dog.targetY - dog.y;
-        dog.x += dx * 0.1;
-        dog.y += dy * 0.1;
-
-        // 更新腿部动画
-        dog.legAngle += dog.legSpeed;
-    }
-}
-
-// 修改碰撞检测
-function checkCollision(box) {
-    if (gameState.isInvincible) return false;  // 无敌状态下不检测碰撞
-
-    const catHitbox = {
-        left: cat.x - cat.width/3,
-        right: cat.x + cat.width/3,
-        top: cat.y - cat.height/3,
-        bottom: cat.y + cat.height/3
-    };
-
-    const boxHitbox = {
-        left: box.x,
-        right: box.x + box.width,
-        top: box.y,
-        bottom: box.y + box.height
-    };
-
-    if (catHitbox.right > boxHitbox.left && 
-        catHitbox.left < boxHitbox.right && 
-        catHitbox.bottom > boxHitbox.top && 
-        catHitbox.top < boxHitbox.bottom) {
-        
-        if (gameState.lives > 0) {
-            handleCollision();
-            return false;  // 不结束游戏
-        }
+    // 添加碰撞处理函数
+    function handleCollision() {
+        gameState.lives--;
         sounds.hit.play();
-        return true;  // 生命值为0时结束游戏
-    }
-    return false;
-}
-
-// 金币碰撞检测
-function checkCoinCollision(coin) {
-    const catHitbox = {
-        left: cat.x - cat.width/3,
-        right: cat.x + cat.width/3,
-        top: cat.y - cat.height/3,
-        bottom: cat.y + cat.height/3
-    };
-
-    const coinHitbox = {
-        left: coin.x - coin.size/2,
-        right: coin.x + coin.size/2,
-        top: coin.y - coin.size/2,
-        bottom: coin.y + coin.size/2
-    };
-
-    return catHitbox.right > coinHitbox.left && 
-           catHitbox.left < coinHitbox.right && 
-           catHitbox.bottom > coinHitbox.top && 
-           catHitbox.top < coinHitbox.bottom;
-}
-
-// 添加碰撞处理函数
-function handleCollision() {
-    gameState.lives--;
-    sounds.hit.play();
-    
-    // 设置无敌状态
-    gameState.isInvincible = true;
-    setTimeout(() => {
-        gameState.isInvincible = false;
-    }, gameState.invincibleTime);
-}
-
-// 修改游戏结束函数
-function gameOver() {
-    gameState.isRunning = false;
-    gameState.isPaused = false;  // 确保游戏结束时不是暂停状态
-    
-    // 判断是否胜利（时间用完而不是撞到箱子）
-    if (gameState.timeLeft <= 0) {
-        gameState.lastGameWon = true;
-        gameState.currentLevel++;
-    } else {
-        gameState.lastGameWon = false;
-        gameState.currentLevel = 1;
-    }
-    
-    // 关闭商城，但不关闭背包
-    gameState.showShop = false;
-    
-    if (gameState.frameId) {
-        cancelAnimationFrame(gameState.frameId);
-        gameState.frameId = null;
-    }
-    
-    sounds.hit.play();
-    setTimeout(() => {
-        sounds.meow.play();
-    }, 500);
-}
-
-// 添加中场休息函数
-function startHalfTimeBreak() {
-    gameState.isInBreak = true;
-    gameState.hadHalfTimeBreak = true;
-    
-    // 播放提示音效
-    sounds.meow.play();
-    
-    // 3秒后恢复游戏
-    setTimeout(() => {
-        gameState.isInBreak = false;
-        // 给予短暂无敌时间
+        
+        // 设置无敌状态
         gameState.isInvincible = true;
         setTimeout(() => {
             gameState.isInvincible = false;
         }, gameState.invincibleTime);
-    }, BREAK_DURATION);
-}
-
-// 修改游戏结束显示
-function drawGameOver() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 60px Arial';
-    ctx.textAlign = 'center';
-    
-    if (gameState.timeLeft <= 0) {
-        ctx.fillText('游戏胜利！', canvas.width/2, canvas.height/2 - 40);
-        ctx.font = 'bold 30px Arial';
-        ctx.fillText(`下一关速度增加到 ${(BASE_SPEED + LEVEL_SPEED_UP).toFixed(1)}x`, canvas.width/2, canvas.height/2 + 160);
-    } else {
-        ctx.fillText('游戏结束', canvas.width/2, canvas.height/2 - 40);
-        ctx.font = 'bold 30px Arial';
-        ctx.fillText('速度重置为 1.0x', canvas.width/2, canvas.height/2 + 160);
     }
-    
-    ctx.font = 'bold 40px Arial';
-    ctx.fillText(`收集金币: ${gameState.gameCoins - 35}`, canvas.width/2, canvas.height/2 + 20);
-    ctx.fillText(`总游戏币: ${gameState.gameCoins}`, canvas.width/2, canvas.height/2 + 70);
-    ctx.fillText(`商城币: ${gameState.shopCoins}`, canvas.width/2, canvas.height/2 + 120);
-    
-    // 绘制背包按钮
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.fillRect(20, canvas.height - 80, 100, 40);
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 20px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText('🎒 背包', 35, canvas.height - 50);
-    
-    ctx.textAlign = 'center';
-    ctx.fillText('点击重新开始', canvas.width/2, canvas.height/2 + 200);
-}
 
-// 修改绘制函数
-function draw() {
-    console.log('绘制中...', '小鸟位置:', cat.x, cat.y);
-    
-    // 清除特定区域而不是整个画布
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // 修改游戏结束函数
+    function gameOver() {
+        gameState.isRunning = false;
+        gameState.isPaused = false;  // 确保游戏结束时不是暂停状态
+        
+        // 判断是否胜利（时间用完而不是撞到箱子）
+        if (gameState.timeLeft <= 0) {
+            gameState.lastGameWon = true;
+            gameState.currentLevel++;
+        } else {
+            gameState.lastGameWon = false;
+            gameState.currentLevel = 1;
+        }
+        
+        // 关闭商城，但不关闭背包
+        gameState.showShop = false;
+        
+        if (gameState.frameId) {
+            cancelAnimationFrame(gameState.frameId);
+            gameState.frameId = null;
+        }
+        
+        sounds.hit.play();
+        setTimeout(() => {
+            sounds.meow.play();
+        }, 500);
+    }
 
-    // 使用简化的背景绘制
-    ctx.fillStyle = '#87CEEB';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // 添加中场休息函数
+    function startHalfTimeBreak() {
+        gameState.isInBreak = true;
+        gameState.hadHalfTimeBreak = true;
+        
+        // 播放提示音效
+        sounds.meow.play();
+        
+        // 3秒后恢复游戏
+        setTimeout(() => {
+            gameState.isInBreak = false;
+            // 给予短暂无敌时间
+            gameState.isInvincible = true;
+            setTimeout(() => {
+                gameState.isInvincible = false;
+            }, gameState.invincibleTime);
+        }, BREAK_DURATION);
+    }
 
+    // 修改游戏结束显示
+    function drawGameOver() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 60px Arial';
+        ctx.textAlign = 'center';
+        
+        if (gameState.timeLeft <= 0) {
+            ctx.fillText('游戏胜利！', canvas.width/2, canvas.height/2 - 40);
+            ctx.font = 'bold 30px Arial';
+            ctx.fillText(`下一关速度增加到 ${(BASE_SPEED + LEVEL_SPEED_UP).toFixed(1)}x`, canvas.width/2, canvas.height/2 + 160);
+        } else {
+            ctx.fillText('游戏结束', canvas.width/2, canvas.height/2 - 40);
+            ctx.font = 'bold 30px Arial';
+            ctx.fillText('速度重置为 1.0x', canvas.width/2, canvas.height/2 + 160);
+        }
+        
+        ctx.font = 'bold 40px Arial';
+        ctx.fillText(`收集金币: ${gameState.gameCoins - 35}`, canvas.width/2, canvas.height/2 + 20);
+        ctx.fillText(`总游戏币: ${gameState.gameCoins}`, canvas.width/2, canvas.height/2 + 70);
+        ctx.fillText(`商城币: ${gameState.shopCoins}`, canvas.width/2, canvas.height/2 + 120);
+        
+        // 绘制背包按钮
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.fillRect(20, canvas.height - 80, 100, 40);
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText('🎒 背包', 35, canvas.height - 50);
+        
+        ctx.textAlign = 'center';
+        ctx.fillText('点击重新开始', canvas.width/2, canvas.height/2 + 200);
+    }
+
+    // 修改绘制函数
+    function draw() {
+        console.log('绘制中...', '小鸟位置:', cat.x, cat.y);
+        
+        // 清除特定区域而不是整个画布
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 使用简化的背景绘制
+        ctx.fillStyle = '#87CEEB';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制太阳
+        ctx.save();
+        // 太阳光晕
+        const gradient = ctx.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, sun.radius * 2);
     // 绘制太阳
     ctx.save();
     // 太阳光晕
