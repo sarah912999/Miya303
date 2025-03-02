@@ -692,1172 +692,1173 @@ function initGame() {
         ctx.save();
         // 太阳光晕
         const gradient = ctx.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, sun.radius * 2);
-    // 绘制太阳
-    ctx.save();
-    // 太阳光晕
-    const gradient = ctx.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, sun.radius * 2);
-    gradient.addColorStop(0, 'rgba(255, 255, 190, 0.8)');
-    gradient.addColorStop(1, 'rgba(255, 255, 190, 0)');
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(sun.x, sun.y, sun.radius * 2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 太阳本体
-    ctx.fillStyle = '#FFD700';
-    ctx.beginPath();
-    ctx.arc(sun.x, sun.y, sun.radius, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 太阳光芒
-    ctx.strokeStyle = '#FFD700';
-    ctx.lineWidth = 3;
-    for (let i = 0; i < sun.rays; i++) {
-        const angle = (i * Math.PI * 2) / sun.rays;
-        const innerRadius = sun.radius + 10;
-        const outerRadius = sun.radius + 25;
+        gradient.addColorStop(0, 'rgba(255, 255, 190, 0.8)');
+        gradient.addColorStop(1, 'rgba(255, 255, 190, 0)');
+        ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.moveTo(
-            sun.x + Math.cos(angle) * innerRadius,
-            sun.y + Math.sin(angle) * innerRadius
-        );
-        ctx.lineTo(
-            sun.x + Math.cos(angle) * outerRadius,
-            sun.y + Math.sin(angle) * outerRadius
-        );
-        ctx.stroke();
-    }
-    ctx.restore();
-
-    // 绘制云朵
-    clouds.forEach(cloud => {
-        ctx.save();
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        
-        // 主体
-        ctx.beginPath();
-        ctx.arc(cloud.x, cloud.y, cloud.size, 0, Math.PI * 2);
-        ctx.arc(cloud.x + cloud.size * 0.8, cloud.y - cloud.size * 0.2, cloud.size * 0.6, 0, Math.PI * 2);
-        ctx.arc(cloud.x + cloud.size * 1.4, cloud.y, cloud.size * 0.8, 0, Math.PI * 2);
-        ctx.arc(cloud.x + cloud.size * 0.5, cloud.y + cloud.size * 0.2, cloud.size * 0.7, 0, Math.PI * 2);
+        ctx.arc(sun.x, sun.y, sun.radius * 2, 0, Math.PI * 2);
         ctx.fill();
 
-        // 添加阴影效果
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+        // 太阳本体
+        ctx.fillStyle = '#FFD700';
         ctx.beginPath();
-        ctx.arc(cloud.x + 2, cloud.y + 2, cloud.size, 0, Math.PI * 2);
-        ctx.arc(cloud.x + cloud.size * 0.8 + 2, cloud.y - cloud.size * 0.2 + 2, cloud.size * 0.6, 0, Math.PI * 2);
-        ctx.arc(cloud.x + cloud.size * 1.4 + 2, cloud.y + 2, cloud.size * 0.8, 0, Math.PI * 2);
-        ctx.arc(cloud.x + cloud.size * 0.5 + 2, cloud.y + cloud.size * 0.2 + 2, cloud.size * 0.7, 0, Math.PI * 2);
+        ctx.arc(sun.x, sun.y, sun.radius, 0, Math.PI * 2);
         ctx.fill();
+
+        // 太阳光芒
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 3;
+        for (let i = 0; i < sun.rays; i++) {
+            const angle = (i * Math.PI * 2) / sun.rays;
+            const innerRadius = sun.radius + 10;
+            const outerRadius = sun.radius + 25;
+            ctx.beginPath();
+            ctx.moveTo(
+                sun.x + Math.cos(angle) * innerRadius,
+                sun.y + Math.sin(angle) * innerRadius
+            );
+            ctx.lineTo(
+                sun.x + Math.cos(angle) * outerRadius,
+                sun.y + Math.sin(angle) * outerRadius
+            );
+            ctx.stroke();
+        }
         ctx.restore();
 
-        // 移动云朵
-        cloud.x -= 0.2;  // 缓慢移动
-        if (cloud.x + cloud.size * 2 < 0) {
-            cloud.x = canvas.width + cloud.size;
-            cloud.y = Math.random() * canvas.height / 3;  // 随机高度
-        }
-    });
+        // 绘制云朵
+        clouds.forEach(cloud => {
+            ctx.save();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            
+            // 主体
+            ctx.beginPath();
+            ctx.arc(cloud.x, cloud.y, cloud.size, 0, Math.PI * 2);
+            ctx.arc(cloud.x + cloud.size * 0.8, cloud.y - cloud.size * 0.2, cloud.size * 0.6, 0, Math.PI * 2);
+            ctx.arc(cloud.x + cloud.size * 1.4, cloud.y, cloud.size * 0.8, 0, Math.PI * 2);
+            ctx.arc(cloud.x + cloud.size * 0.5, cloud.y + cloud.size * 0.2, cloud.size * 0.7, 0, Math.PI * 2);
+            ctx.fill();
 
-    // 绘制草地
-    const groundY = canvas.height - grassHeight;
-    
-    // 绘制地面
-    ctx.fillStyle = '#8B4513';  // 深棕色土地
-    ctx.fillRect(0, groundY + 20, canvas.width, grassHeight - 20);
-    
-    // 绘制草地
-    ctx.fillStyle = '#90EE90';  // 浅绿色草地
-    ctx.beginPath();
-    for(let x = 0; x < canvas.width; x += 4) {
-        ctx.moveTo(x, groundY + 20);
-        ctx.lineTo(x, groundY);
-        ctx.lineTo(x + 2, groundY + 10);
-    }
-    ctx.fill();
+            // 添加阴影效果
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.beginPath();
+            ctx.arc(cloud.x + 2, cloud.y + 2, cloud.size, 0, Math.PI * 2);
+            ctx.arc(cloud.x + cloud.size * 0.8 + 2, cloud.y - cloud.size * 0.2 + 2, cloud.size * 0.6, 0, Math.PI * 2);
+            ctx.arc(cloud.x + cloud.size * 1.4 + 2, cloud.y + 2, cloud.size * 0.8, 0, Math.PI * 2);
+            ctx.arc(cloud.x + cloud.size * 0.5 + 2, cloud.y + cloud.size * 0.2 + 2, cloud.size * 0.7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
 
-    // 绘制猫咪
-    drawCat();
-
-    // 绘制箱子
-    for (let box of boxes) {
-        drawBox(box.x, box.y, box.width, box.height);
-    }
-
-    // 绘制金币
-    for (let coin of coins) {
-        if (!coin.collected) {
-            drawCoin(coin);
-        }
-    }
-
-    // 左侧显示游戏币和得分
-    ctx.fillStyle = 'black';
-    ctx.font = 'bold 40px Arial';
-    ctx.fillText(`游戏币: ${gameState.gameCoins}/50`, 20, 60);
-
-    // 右侧显示时间
-    const minutes = Math.floor(gameState.timeLeft / 60000);
-    const seconds = Math.floor((gameState.timeLeft % 60000) / 1000);
-    ctx.textAlign = 'right';
-    ctx.fillText(`时间: ${minutes}:${seconds.toString().padStart(2, '0')}`, canvas.width - 20, 60);
-
-    // 顶部中间显示生命值
-    ctx.textAlign = 'center';
-    const hearts = '❤️'.repeat(gameState.lives);
-    ctx.font = '30px Arial';
-    ctx.fillText(hearts, canvas.width / 2, 40);
-
-    // 重置文本对齐
-    ctx.textAlign = 'left';
-
-    // 绘制暂停按钮
-    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillRect(canvas.width - 180, 80, 80, 40);
-    ctx.fillStyle = 'white';
-    ctx.font = '20px Arial';
-    ctx.fillText(gameState.isPaused ? '继续' : '暂停', canvas.width - 160, 105);
-
-    // 绘制商城按钮
-    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillRect(canvas.width - 100, 80, 80, 40);
-    ctx.fillStyle = 'white';
-    ctx.font = '20px Arial';
-    ctx.fillText('商城', canvas.width - 80, 105);
-
-    // 绘制暂停界面
-    if (gameState.isPaused && !gameState.showShop && !gameState.showBag && gameState.isRunning) {  // 添加 isRunning 检查
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // 绘制暂停文字
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 60px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('游戏暂停', canvas.width/2, canvas.height/2);
-        ctx.font = 'bold 30px Arial';
-        ctx.fillText('点击继续按钮继续游戏', canvas.width/2, canvas.height/2 + 60);
-
-        // 绘制背包按钮
-        drawBagButton();
-    }
-
-    // 绘制商城界面
-    if (gameState.showShop) {
-        drawShop();
-    }
-
-    // 先绘制游戏结束界面
-    if (!gameState.isRunning && !gameState.showBag) {
-        drawGameOver();
-    }
-
-    // 最后绘制背包界面，这样背包会在最上层
-    if (gameState.showBag) {
-        drawBag();
-    }
-
-    // 绘制星星
-    gameState.stars.forEach(star => {
-        if (!star.collected) {
-            drawStar(star);
-        }
-    });
-
-    // 显示当前速度倍数
-    ctx.fillStyle = 'black';
-    ctx.font = 'bold 30px Arial';
-    ctx.fillText(`速度: ${gameState.speedMultiplier.toFixed(1)}x`, 20, 200);
-
-    // 绘制通知
-    if (gameState.notifications && gameState.notifications.length > 0) {
-        const currentTime = Date.now();
-        gameState.notifications = gameState.notifications.filter(notification => {
-            const elapsed = currentTime - notification.startTime;
-            if (elapsed < notification.duration) {
-                // 计算透明度
-                const alpha = 1 - (elapsed / notification.duration);
-                
-                // 绘制通知
-                ctx.save();
-                ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.7})`;
-                ctx.fillRect(canvas.width/2 - 150, 100, 300, 60);
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                ctx.font = 'bold 20px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(notification.text, canvas.width/2, 140);
-                ctx.restore();
-                return true;
+            // 移动云朵
+            cloud.x -= 0.2;  // 缓慢移动
+            if (cloud.x + cloud.size * 2 < 0) {
+                cloud.x = canvas.width + cloud.size;
+                cloud.y = Math.random() * canvas.height / 3;  // 随机高度
             }
-            return false;
         });
-    }
 
-    // 显示道具状态
-    gameState.activeItems.forEach((item, index) => {
-        const timeLeft = Math.ceil((item.endTime - Date.now()) / 1000);
-        if (timeLeft > 0) {
-            ctx.fillStyle = 'black';
-            ctx.font = 'bold 20px Arial';
-            let itemText = '';
-            if (item.id === 'magnet') {
-                itemText = `🧲 ${timeLeft}秒`;
-            } else if (item.id === 'shield') {
-                itemText = `🛡️ ${timeLeft}秒`;
-            }
-            ctx.fillText(itemText, 20, 160 + index * 30);
-        }
-    });
-
-    // 绘制小狗
-    if (dog.active) {
-        drawDog(dog.x, dog.y, dog.legAngle);
-    }
-}
-
-// 修改绘制猫咪函数
-function drawCat() {
-    ctx.save();
-    ctx.translate(cat.x, cat.y);
-    
-    // 更新动画角度
-    cat.rotation = cat.velocity * 0.1;
-    ctx.rotate(cat.rotation);
-    cat.tailAngle += cat.tailSpeed;
-    cat.legAngle += cat.legSpeed;
-
-    // 获取当前皮肤
-    const currentSkin = SKINS.find(skin => skin.id === gameState.currentSkin);
-    const catColor = currentSkin ? currentSkin.color : '#FFA500';  // 默认橙色
-
-    // 绘制尾巴
-    ctx.beginPath();
-    const tailWag = Math.sin(cat.tailAngle) * 0.5;
-    ctx.moveTo(-15, 0);
-    ctx.quadraticCurveTo(
-        -25 + Math.cos(tailWag) * 10,
-        -20 + Math.sin(tailWag) * 10,
-        -30 + Math.cos(tailWag) * 15,
-        -30 + Math.sin(tailWag) * 15
-    );
-    ctx.lineWidth = 8;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = catColor;
-    ctx.stroke();
-
-    // 绘制腿部
-    const legLength = 15;
-    const footSize = 6;
-    const legSwing = Math.sin(cat.legAngle) * 8;
-
-    // 后腿
-    drawLeg(-10, 10, legSwing, catColor);
-    drawLeg(-5, 10, -legSwing, catColor);
-    // 前腿
-    drawLeg(10, 10, -legSwing, catColor);
-    drawLeg(15, 10, legSwing, catColor);
-
-    // 绘制身体
-    ctx.beginPath();
-    ctx.ellipse(0, 0, cat.width/2, cat.height/3, 0, 0, Math.PI * 2);
-    const bodyGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, cat.width/2);
-    bodyGradient.addColorStop(0, catColor);
-    bodyGradient.addColorStop(1, shadeColor(catColor, -20));
-    ctx.fillStyle = bodyGradient;
-    ctx.fill();
-    ctx.strokeStyle = shadeColor(catColor, -30);
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // 绘制头部
-    ctx.beginPath();
-    ctx.arc(15, -5, cat.width/3, 0, Math.PI * 2);
-    ctx.fillStyle = catColor;
-    ctx.fill();
-    ctx.strokeStyle = shadeColor(catColor, -30);
-    ctx.stroke();
-
-    // 绘制耳朵（使用相同的颜色）
-    ctx.fillStyle = catColor;
-    drawEar(5, -15, 0, -35, 15, -20);  // 左耳
-    drawEar(20, -15, 25, -35, 30, -20); // 右耳
-
-    // 保持眼睛、鼻子和胡须的颜色不变
-    drawEyes();
-    drawNose();
-    drawWhiskers();
-
-    ctx.restore();
-}
-
-// 添加颜色处理辅助函数
-function shadeColor(color, percent) {
-    let R = parseInt(color.substring(1,3),16);
-    let G = parseInt(color.substring(3,5),16);
-    let B = parseInt(color.substring(5,7),16);
-
-    R = parseInt(R * (100 + percent) / 100);
-    G = parseInt(G * (100 + percent) / 100);
-    B = parseInt(B * (100 + percent) / 100);
-
-    R = (R<255)?R:255;  
-    G = (G<255)?G:255;  
-    B = (B<255)?B:255;  
-
-    const RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
-    const GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
-    const BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
-
-    return "#"+RR+GG+BB;
-}
-
-// 分离眼睛绘制函数
-function drawEyes() {
-    // 左眼
-    ctx.beginPath();
-    ctx.ellipse(10, -10, 4, 6, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#87CEEB';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(10, -10, 2, 4, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'black';
-    ctx.fill();
-    // 左眼高光
-    ctx.beginPath();
-    ctx.arc(11, -12, 1.5, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-
-    // 右眼
-    ctx.beginPath();
-    ctx.ellipse(20, -10, 4, 6, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#87CEEB';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(20, -10, 2, 4, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'black';
-    ctx.fill();
-    // 右眼高光
-    ctx.beginPath();
-    ctx.arc(21, -12, 1.5, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-}
-
-// 分离鼻子绘制函数
-function drawNose() {
-    ctx.beginPath();
-    ctx.moveTo(15, -5);
-    ctx.lineTo(12, -2);
-    ctx.lineTo(18, -2);
-    ctx.closePath();
-    ctx.fillStyle = '#FFB6C1';
-    ctx.fill();
-}
-
-// 辅助函数
-function drawLeg(x, y, swing, color) {
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + swing, y + 15);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 4;
-    ctx.stroke();
-
-    // 脚掌
-    ctx.beginPath();
-    ctx.ellipse(x + swing, y + 15, 6, 4, 0, 0, Math.PI * 2);
-    ctx.fillStyle = shadeColor(color, 20); // 稍微亮一点的颜色
-    ctx.fill();
-    ctx.strokeStyle = shadeColor(color, -30); // 暗一点的轮廓
-    ctx.lineWidth = 1;
-    ctx.stroke();
-}
-
-function drawEar(x1, y1, x2, y2, x3, y3) {
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.lineTo(x3, y3);
-    ctx.fillStyle = '#FFB6C1';
-    ctx.fill();
-}
-
-function drawWhiskers() {
-    ctx.beginPath();
-    // 左边胡须
-    ctx.moveTo(5, -3);
-    ctx.lineTo(-10, -8);
-    ctx.moveTo(5, -1);
-    ctx.lineTo(-10, -1);
-    ctx.moveTo(5, 1);
-    ctx.lineTo(-10, 6);
-    // 右边胡须
-    ctx.moveTo(25, -3);
-    ctx.lineTo(40, -8);
-    ctx.moveTo(25, -1);
-    ctx.lineTo(40, -1);
-    ctx.moveTo(25, 1);
-    ctx.lineTo(40, 6);
-    ctx.strokeStyle = '#C0C0C0';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-}
-
-// 修改绘制障碍物的部分
-function drawBox(x, y, width, height) {
-    // 箱子主体
-    ctx.fillStyle = boxColors.main;
-    ctx.fillRect(x, y, width, height);
-
-    // 箱子边框
-    ctx.strokeStyle = boxColors.dark;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x, y, width, height);
-
-    // 木纹效果
-    ctx.strokeStyle = boxColors.light;
-    ctx.lineWidth = 1;
-    for (let i = 10; i < width; i += 20) {
+        // 绘制草地
+        const groundY = canvas.height - grassHeight;
+        
+        // 绘制地面
+        ctx.fillStyle = '#8B4513';  // 深棕色土地
+        ctx.fillRect(0, groundY + 20, canvas.width, grassHeight - 20);
+        
+        // 绘制草地
+        ctx.fillStyle = '#90EE90';  // 浅绿色草地
         ctx.beginPath();
-        ctx.moveTo(x + i, y);
-        ctx.lineTo(x + i, y + height);
+        for(let x = 0; x < canvas.width; x += 4) {
+            ctx.moveTo(x, groundY + 20);
+            ctx.lineTo(x, groundY);
+            ctx.lineTo(x + 2, groundY + 10);
+        }
+        ctx.fill();
+
+        // 绘制猫咪
+        drawCat();
+
+        // 绘制箱子
+        for (let box of boxes) {
+            drawBox(box.x, box.y, box.width, box.height);
+        }
+
+        // 绘制金币
+        for (let coin of coins) {
+            if (!coin.collected) {
+                drawCoin(coin);
+            }
+        }
+
+        // 左侧显示游戏币和得分
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 40px Arial';
+        ctx.fillText(`游戏币: ${gameState.gameCoins}/50`, 20, 60);
+
+        // 右侧显示时间
+        const minutes = Math.floor(gameState.timeLeft / 60000);
+        const seconds = Math.floor((gameState.timeLeft % 60000) / 1000);
+        ctx.textAlign = 'right';
+        ctx.fillText(`时间: ${minutes}:${seconds.toString().padStart(2, '0')}`, canvas.width - 20, 60);
+
+        // 顶部中间显示生命值
+        ctx.textAlign = 'center';
+        const hearts = '❤️'.repeat(gameState.lives);
+        ctx.font = '30px Arial';
+        ctx.fillText(hearts, canvas.width / 2, 40);
+
+        // 重置文本对齐
+        ctx.textAlign = 'left';
+
+        // 绘制暂停按钮
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(canvas.width - 180, 80, 80, 40);
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Arial';
+        ctx.fillText(gameState.isPaused ? '继续' : '暂停', canvas.width - 160, 105);
+
+        // 绘制商城按钮
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(canvas.width - 100, 80, 80, 40);
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Arial';
+        ctx.fillText('商城', canvas.width - 80, 105);
+
+        // 绘制暂停界面
+        if (gameState.isPaused && !gameState.showShop && !gameState.showBag && gameState.isRunning) {  // 添加 isRunning 检查
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制暂停文字
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 60px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('游戏暂停', canvas.width/2, canvas.height/2);
+            ctx.font = 'bold 30px Arial';
+            ctx.fillText('点击继续按钮继续游戏', canvas.width/2, canvas.height/2 + 60);
+
+            // 绘制背包按钮
+            drawBagButton();
+        }
+
+        // 绘制商城界面
+        if (gameState.showShop) {
+            drawShop();
+        }
+
+        // 先绘制游戏结束界面
+        if (!gameState.isRunning && !gameState.showBag) {
+            drawGameOver();
+        }
+
+        // 最后绘制背包界面，这样背包会在最上层
+        if (gameState.showBag) {
+            drawBag();
+        }
+
+        // 绘制星星
+        gameState.stars.forEach(star => {
+            if (!star.collected) {
+                drawStar(star);
+            }
+        });
+
+        // 显示当前速度倍数
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 30px Arial';
+        ctx.fillText(`速度: ${gameState.speedMultiplier.toFixed(1)}x`, 20, 200);
+
+        // 绘制通知
+        if (gameState.notifications && gameState.notifications.length > 0) {
+            const currentTime = Date.now();
+            gameState.notifications = gameState.notifications.filter(notification => {
+                const elapsed = currentTime - notification.startTime;
+                if (elapsed < notification.duration) {
+                    // 计算透明度
+                    const alpha = 1 - (elapsed / notification.duration);
+                    
+                    // 绘制通知
+                    ctx.save();
+                    ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.7})`;
+                    ctx.fillRect(canvas.width/2 - 150, 100, 300, 60);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                    ctx.font = 'bold 20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(notification.text, canvas.width/2, 140);
+                    ctx.restore();
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        // 显示道具状态
+        gameState.activeItems.forEach((item, index) => {
+            const timeLeft = Math.ceil((item.endTime - Date.now()) / 1000);
+            if (timeLeft > 0) {
+                ctx.fillStyle = 'black';
+                ctx.font = 'bold 20px Arial';
+                let itemText = '';
+                if (item.id === 'magnet') {
+                    itemText = `🧲 ${timeLeft}秒`;
+                } else if (item.id === 'shield') {
+                    itemText = `🛡️ ${timeLeft}秒`;
+                }
+                ctx.fillText(itemText, 20, 160 + index * 30);
+            }
+        });
+
+        // 绘制小狗
+        if (dog.active) {
+            drawDog(dog.x, dog.y, dog.legAngle);
+        }
+    }
+
+    // 修改绘制猫咪函数
+    function drawCat() {
+        ctx.save();
+        ctx.translate(cat.x, cat.y);
+        
+        // 更新动画角度
+        cat.rotation = cat.velocity * 0.1;
+        ctx.rotate(cat.rotation);
+        cat.tailAngle += cat.tailSpeed;
+        cat.legAngle += cat.legSpeed;
+
+        // 获取当前皮肤
+        const currentSkin = SKINS.find(skin => skin.id === gameState.currentSkin);
+        const catColor = currentSkin ? currentSkin.color : '#FFA500';  // 默认橙色
+
+        // 绘制尾巴
+        ctx.beginPath();
+        const tailWag = Math.sin(cat.tailAngle) * 0.5;
+        ctx.moveTo(-15, 0);
+        ctx.quadraticCurveTo(
+            -25 + Math.cos(tailWag) * 10,
+            -20 + Math.sin(tailWag) * 10,
+            -30 + Math.cos(tailWag) * 15,
+            -30 + Math.sin(tailWag) * 15
+        );
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = catColor;
+        ctx.stroke();
+
+        // 绘制腿部
+        const legLength = 15;
+        const footSize = 6;
+        const legSwing = Math.sin(cat.legAngle) * 8;
+
+        // 后腿
+        drawLeg(-10, 10, legSwing, catColor);
+        drawLeg(-5, 10, -legSwing, catColor);
+        // 前腿
+        drawLeg(10, 10, -legSwing, catColor);
+        drawLeg(15, 10, legSwing, catColor);
+
+        // 绘制身体
+        ctx.beginPath();
+        ctx.ellipse(0, 0, cat.width/2, cat.height/3, 0, 0, Math.PI * 2);
+        const bodyGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, cat.width/2);
+        bodyGradient.addColorStop(0, catColor);
+        bodyGradient.addColorStop(1, shadeColor(catColor, -20));
+        ctx.fillStyle = bodyGradient;
+        ctx.fill();
+        ctx.strokeStyle = shadeColor(catColor, -30);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // 绘制头部
+        ctx.beginPath();
+        ctx.arc(15, -5, cat.width/3, 0, Math.PI * 2);
+        ctx.fillStyle = catColor;
+        ctx.fill();
+        ctx.strokeStyle = shadeColor(catColor, -30);
+        ctx.stroke();
+
+        // 绘制耳朵（使用相同的颜色）
+        ctx.fillStyle = catColor;
+        drawEar(5, -15, 0, -35, 15, -20);  // 左耳
+        drawEar(20, -15, 25, -35, 30, -20); // 右耳
+
+        // 保持眼睛、鼻子和胡须的颜色不变
+        drawEyes();
+        drawNose();
+        drawWhiskers();
+
+        ctx.restore();
+    }
+
+    // 添加颜色处理辅助函数
+    function shadeColor(color, percent) {
+        let R = parseInt(color.substring(1,3),16);
+        let G = parseInt(color.substring(3,5),16);
+        let B = parseInt(color.substring(5,7),16);
+
+        R = parseInt(R * (100 + percent) / 100);
+        G = parseInt(G * (100 + percent) / 100);
+        B = parseInt(B * (100 + percent) / 100);
+
+        R = (R<255)?R:255;  
+        G = (G<255)?G:255;  
+        B = (B<255)?B:255;  
+
+        const RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+        const GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+        const BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+
+        return "#"+RR+GG+BB;
+    }
+
+    // 分离眼睛绘制函数
+    function drawEyes() {
+        // 左眼
+        ctx.beginPath();
+        ctx.ellipse(10, -10, 4, 6, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#87CEEB';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(10, -10, 2, 4, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+        // 左眼高光
+        ctx.beginPath();
+        ctx.arc(11, -12, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+
+        // 右眼
+        ctx.beginPath();
+        ctx.ellipse(20, -10, 4, 6, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#87CEEB';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(20, -10, 2, 4, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+        // 右眼高光
+        ctx.beginPath();
+        ctx.arc(21, -12, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+    }
+
+    // 分离鼻子绘制函数
+    function drawNose() {
+        ctx.beginPath();
+        ctx.moveTo(15, -5);
+        ctx.lineTo(12, -2);
+        ctx.lineTo(18, -2);
+        ctx.closePath();
+        ctx.fillStyle = '#FFB6C1';
+        ctx.fill();
+    }
+
+    // 辅助函数
+    function drawLeg(x, y, swing, color) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + swing, y + 15);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // 脚掌
+        ctx.beginPath();
+        ctx.ellipse(x + swing, y + 15, 6, 4, 0, 0, Math.PI * 2);
+        ctx.fillStyle = shadeColor(color, 20); // 稍微亮一点的颜色
+        ctx.fill();
+        ctx.strokeStyle = shadeColor(color, -30); // 暗一点的轮廓
+        ctx.lineWidth = 1;
         ctx.stroke();
     }
 
-    // 金属装饰
-    const cornerSize = 10;
-    // 左上角
-    drawCornerMetal(x, y, cornerSize);
-    // 右上角
-    drawCornerMetal(x + width - cornerSize, y, cornerSize);
-    // 左下角
-    drawCornerMetal(x, y + height - cornerSize, cornerSize);
-    // 右下角
-    drawCornerMetal(x + width - cornerSize, y + height - cornerSize, cornerSize);
-}
-
-// 绘制金属角装饰
-function drawCornerMetal(x, y, size) {
-    ctx.fillStyle = boxColors.metal;
-    ctx.beginPath();
-    ctx.arc(x + size/2, y + size/2, size/2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = boxColors.dark;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // 添加螺丝效果
-    ctx.beginPath();
-    ctx.moveTo(x + size/2 - 2, y + size/2);
-    ctx.lineTo(x + size/2 + 2, y + size/2);
-    ctx.moveTo(x + size/2, y + size/2 - 2);
-    ctx.lineTo(x + size/2, y + size/2 + 2);
-    ctx.strokeStyle = boxColors.dark;
-    ctx.stroke();
-}
-
-// 修改金币绘制函数
-function drawCoin(coin) {
-    ctx.save();
-    ctx.translate(coin.x, coin.y + Math.sin(coin.bounceOffset + coinAnimation.rotation * coinAnimation.bounceSpeed) * coinAnimation.bounceHeight);
-    ctx.rotate(coinAnimation.rotation);
-
-    // 金币外圈
-    ctx.beginPath();
-    ctx.arc(0, 0, coin.size/2, 0, Math.PI * 2);
-    ctx.fillStyle = '#FFD700';  // 金色
-    ctx.fill();
-    ctx.strokeStyle = '#DAA520';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // 绘制¥符号
-    ctx.fillStyle = '#8B4513';  // 深棕色文字
-    ctx.font = `bold ${coin.size * 0.8}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('¥', 0, 0);  // 改回¥符号
-
-    // 添加闪光效果
-    ctx.beginPath();
-    ctx.arc(-coin.size/6, -coin.size/6, coin.size/8, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.fill();
-
-    ctx.restore();
-}
-
-// 修改游戏循环
-function gameLoop() {
-    // 绘制游戏画面
-    draw();
-    
-    // 只有在游戏运行且未暂停时才更新游戏状态
-    if (gameState.isRunning && !gameState.isPaused && !gameState.showShop && !gameState.showBag) {
-        const currentTime = Date.now();
-        gameState.timeLeft = Math.max(0, GAME_DURATION - (currentTime - gameState.startTime));
-        
-        if (gameState.timeLeft <= 0) {
-            gameOver();
-            return;
-        }
-
-        update();
+    function drawEar(x1, y1, x2, y2, x3, y3) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineTo(x3, y3);
+        ctx.fillStyle = '#FFB6C1';
+        ctx.fill();
     }
 
-    // 继续游戏循环
-    gameState.frameId = requestAnimationFrame(gameLoop);
-}
+    function drawWhiskers() {
+        ctx.beginPath();
+        // 左边胡须
+        ctx.moveTo(5, -3);
+        ctx.lineTo(-10, -8);
+        ctx.moveTo(5, -1);
+        ctx.lineTo(-10, -1);
+        ctx.moveTo(5, 1);
+        ctx.lineTo(-10, 6);
+        // 右边胡须
+        ctx.moveTo(25, -3);
+        ctx.lineTo(40, -8);
+        ctx.moveTo(25, -1);
+        ctx.lineTo(40, -1);
+        ctx.moveTo(25, 1);
+        ctx.lineTo(40, 6);
+        ctx.strokeStyle = '#C0C0C0';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
 
-// 修改游戏开始函数
-function startGame() {
-    init();
-    gameState.isRunning = true;
-    gameState.isPaused = false;
-    gameState.showShop = false;
-    requestAnimationFrame(gameLoop);
-}
+    // 修改绘制障碍物的部分
+    function drawBox(x, y, width, height) {
+        // 箱子主体
+        ctx.fillStyle = boxColors.main;
+        ctx.fillRect(x, y, width, height);
 
-// 修改点击事件
-canvas.addEventListener('click', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+        // 箱子边框
+        ctx.strokeStyle = boxColors.dark;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
 
-    // 如果背包打开，优先处理背包的点击事件
-    if (gameState.showBag) {
-        // 检查是否点击了关闭按钮
-        if (x >= canvas.width - 60 && x <= canvas.width - 20 && y >= 20 && y <= 60) {
-            gameState.showBag = false;
+        // 木纹效果
+        ctx.strokeStyle = boxColors.light;
+        ctx.lineWidth = 1;
+        for (let i = 10; i < width; i += 20) {
+            ctx.beginPath();
+            ctx.moveTo(x + i, y);
+            ctx.lineTo(x + i, y + height);
+            ctx.stroke();
+        }
+
+        // 金属装饰
+        const cornerSize = 10;
+        // 左上角
+        drawCornerMetal(x, y, cornerSize);
+        // 右上角
+        drawCornerMetal(x + width - cornerSize, y, cornerSize);
+        // 左下角
+        drawCornerMetal(x, y + height - cornerSize, cornerSize);
+        // 右下角
+        drawCornerMetal(x + width - cornerSize, y + height - cornerSize, cornerSize);
+    }
+
+    // 绘制金属角装饰
+    function drawCornerMetal(x, y, size) {
+        ctx.fillStyle = boxColors.metal;
+        ctx.beginPath();
+        ctx.arc(x + size/2, y + size/2, size/2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = boxColors.dark;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // 添加螺丝效果
+        ctx.beginPath();
+        ctx.moveTo(x + size/2 - 2, y + size/2);
+        ctx.lineTo(x + size/2 + 2, y + size/2);
+        ctx.moveTo(x + size/2, y + size/2 - 2);
+        ctx.lineTo(x + size/2, y + size/2 + 2);
+        ctx.strokeStyle = boxColors.dark;
+        ctx.stroke();
+    }
+
+    // 修改金币绘制函数
+    function drawCoin(coin) {
+        ctx.save();
+        ctx.translate(coin.x, coin.y + Math.sin(coin.bounceOffset + coinAnimation.rotation * coinAnimation.bounceSpeed) * coinAnimation.bounceHeight);
+        ctx.rotate(coinAnimation.rotation);
+
+        // 金币外圈
+        ctx.beginPath();
+        ctx.arc(0, 0, coin.size/2, 0, Math.PI * 2);
+        ctx.fillStyle = '#FFD700';  // 金色
+        ctx.fill();
+        ctx.strokeStyle = '#DAA520';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 绘制¥符号
+        ctx.fillStyle = '#8B4513';  // 深棕色文字
+        ctx.font = `bold ${coin.size * 0.8}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('¥', 0, 0);  // 改回¥符号
+
+        // 添加闪光效果
+        ctx.beginPath();
+        ctx.arc(-coin.size/6, -coin.size/6, coin.size/8, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // 修改游戏循环
+    function gameLoop() {
+        // 绘制游戏画面
+        draw();
+        
+        // 只有在游戏运行且未暂停时才更新游戏状态
+        if (gameState.isRunning && !gameState.isPaused && !gameState.showShop && !gameState.showBag) {
+            const currentTime = Date.now();
+            gameState.timeLeft = Math.max(0, GAME_DURATION - (currentTime - gameState.startTime));
+            
+            if (gameState.timeLeft <= 0) {
+                gameOver();
+                return;
+            }
+
+            update();
+        }
+
+        // 继续游戏循环
+        gameState.frameId = requestAnimationFrame(gameLoop);
+    }
+
+    // 修改游戏开始函数
+    function startGame() {
+        init();
+        gameState.isRunning = true;
+        gameState.isPaused = false;
+        gameState.showShop = false;
+        requestAnimationFrame(gameLoop);
+    }
+
+    // 修改点击事件
+    canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        // 如果背包打开，优先处理背包的点击事件
+        if (gameState.showBag) {
+            // 检查是否点击了关闭按钮
+            if (x >= canvas.width - 60 && x <= canvas.width - 20 && y >= 20 && y <= 60) {
+                gameState.showBag = false;
+                return;
+            }
+
+            // 处理皮肤选择
+            SKINS.forEach((skin, index) => {
+                const skinX = canvas.width/4;
+                const skinY = 150 + index * 100;
+                if (x >= skinX && x <= skinX + canvas.width/2 && 
+                    y >= skinY && y <= skinY + 80) {
+                    if (gameState.unlockedSkins.includes(skin.id)) {
+                        gameState.currentSkin = skin.id;
+                        saveSkins();  // 保存皮肤选择
+                    } else if (gameState.shopCoins >= skin.price) {
+                        gameState.shopCoins -= skin.price;
+                        gameState.unlockedSkins.push(skin.id);
+                        gameState.currentSkin = skin.id;
+                        saveShopCoins();
+                        saveSkins();  // 保存新购买的皮肤和选择
+                    }
+                }
+            });
             return;
         }
 
-        // 处理皮肤选择
-        SKINS.forEach((skin, index) => {
-            const skinX = canvas.width/4;
-            const skinY = 150 + index * 100;
-            if (x >= skinX && x <= skinX + canvas.width/2 && 
-                y >= skinY && y <= skinY + 80) {
-                if (gameState.unlockedSkins.includes(skin.id)) {
-                    gameState.currentSkin = skin.id;
-                    saveSkins();  // 保存皮肤选择
-                } else if (gameState.shopCoins >= skin.price) {
-                    gameState.shopCoins -= skin.price;
-                    gameState.unlockedSkins.push(skin.id);
-                    gameState.currentSkin = skin.id;
-                    saveShopCoins();
-                    saveSkins();  // 保存新购买的皮肤和选择
+        // 检查背包按钮点击
+        if (x >= 20 && x <= 120 && y >= canvas.height - 80 && y <= canvas.height - 40) {
+            gameState.showBag = true;
+            return;
+        }
+
+        // 如果游戏结束且背包没打开，点击任意位置重新开始
+        if (!gameState.isRunning && !gameState.showBag) {
+            startGame();
+            return;
+        }
+
+        // 检查商城界面点击
+        if (gameState.showShop) {
+            // 关闭按钮
+            if (x > canvas.width - 40 && x < canvas.width && y < 40) {
+                toggleShop();  // 关闭商城并恢复游戏
+                return;
+            }
+
+            // 商品点击
+            SHOP_ITEMS.forEach((item, index) => {
+                const itemY = 180 + index * 100;
+                if (x > canvas.width/4 && x < canvas.width*3/4 && 
+                    y > itemY && y < itemY + 80) {
+                    buyItem(item.id);
+                }
+            });
+            return;
+        }
+
+        // 检查暂停按钮点击
+        if (gameState.isRunning && x > canvas.width - 180 && x < canvas.width - 100 && y > 80 && y < 120) {
+            gameState.isPaused = !gameState.isPaused;
+            if (!gameState.showShop && !gameState.showBag) {
+                if (gameState.isPaused) {
+                    gameState.wasRunning = true;
+                } else {
+                    if (gameState.wasRunning) {
+                        gameState.wasRunning = false;
+                    }
                 }
             }
-        });
-        return;
-    }
-
-    // 检查背包按钮点击
-    if (x >= 20 && x <= 120 && y >= canvas.height - 80 && y <= canvas.height - 40) {
-        gameState.showBag = true;
-        return;
-    }
-
-    // 如果游戏结束且背包没打开，点击任意位置重新开始
-    if (!gameState.isRunning && !gameState.showBag) {
-        startGame();
-        return;
-    }
-
-    // 检查商城界面点击
-    if (gameState.showShop) {
-        // 关闭按钮
-        if (x > canvas.width - 40 && x < canvas.width && y < 40) {
-            toggleShop();  // 关闭商城并恢复游戏
             return;
         }
 
-        // 商品点击
-        SHOP_ITEMS.forEach((item, index) => {
-            const itemY = 180 + index * 100;
-            if (x > canvas.width/4 && x < canvas.width*3/4 && 
-                y > itemY && y < itemY + 80) {
-                buyItem(item.id);
+        // 检查商城按钮点击
+        if (x > canvas.width - 100 && x < canvas.width - 20 && y > 80 && y < 120) {
+            toggleShop();
+            return;
+        }
+
+        // 游戏正常点击处理
+        if (!gameState.isPaused && !gameState.showShop) {
+            if (!gameState.isRunning) {
+                startGame();
+            } else if (!cat.isJumping || cat.velocity < 0) {
+                // 根据当前速度调整跳跃力度
+                cat.velocity = cat.baseJump * (gameState.speedMultiplier ** 2);  // 使用平方关系
+                cat.isJumping = true;
+                sounds.jump.play();
             }
-        });
-        return;
+        }
+    });
+
+    // 修改商城切换函数
+    function toggleShop() {
+        if (!gameState.showShop) {
+            // 打开商城时
+            gameState.showShop = true;
+            gameState.isRunning = false;
+        } else {
+            // 关闭商城时
+            gameState.showShop = false;
+            if (!gameState.isPaused) {
+                gameState.isRunning = true;
+                // 检查是否有磁铁道具待使用
+                if (gameState.inventory && gameState.inventory.includes('magnet')) {
+                    // 使用磁铁
+                    activateMagnet();
+                    // 从背包中移除磁铁
+                    gameState.inventory = gameState.inventory.filter(item => item !== 'magnet');
+                }
+            }
+        }
     }
 
-    // 检查暂停按钮点击
-    if (gameState.isRunning && x > canvas.width - 180 && x < canvas.width - 100 && y > 80 && y < 120) {
-        gameState.isPaused = !gameState.isPaused;
-        if (!gameState.showShop && !gameState.showBag) {
+    // 购买道具
+    function buyItem(itemId) {
+        const item = SHOP_ITEMS.find(i => i.id === itemId);
+        if (!item || gameState.shopCoins < item.price) return;
+        
+        gameState.shopCoins -= item.price;
+        saveShopCoins();
+        
+        switch(itemId) {
+            case 'shield':
+                activateShield();
+                break;
+            case 'magnet':
+                // 购买磁铁时不直接激活，而是存储到背包
+                if (!gameState.inventory) {
+                    gameState.inventory = [];
+                }
+                gameState.inventory.push('magnet');
+                break;
+            case 'life':
+                if (gameState.lives < 5) {
+                    gameState.lives++;
+                }
+                break;
+            case 'dog':
+                activateDog();
+                break;
+        }
+    }
+
+    // 道具效果
+    function activateShield() {
+        gameState.isInvincible = true;
+        gameState.activeItems.push({
+            id: 'shield',
+            endTime: Date.now() + 5000
+        });
+        setTimeout(() => {
+            gameState.isInvincible = false;
+            gameState.activeItems = gameState.activeItems.filter(item => item.id !== 'shield');
+        }, 5000);
+    }
+
+    function activateMagnet() {
+        const magnetRange = 200;  // 增加磁铁吸引范围
+        const magnetItem = {
+            id: 'magnet',
+            endTime: Date.now() + 15000  // 修改为15秒
+        };
+        gameState.activeItems.push(magnetItem);
+        
+        // 添加磁铁效果
+        const magnetEffect = setInterval(() => {
+            if (!gameState.isRunning) return;
+            
+            coins.forEach(coin => {
+                if (!coin.collected) {
+                    const dx = cat.x - coin.x;
+                    const dy = cat.y - coin.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < magnetRange) {
+                        // 增加吸引力
+                        coin.x += dx * 0.15;  // 增加吸引速度
+                        coin.y += dy * 0.15;
+                    }
+                }
+            });
+        }, 16);
+
+        // 15秒后关闭效果
+        setTimeout(() => {
+            clearInterval(magnetEffect);
+            gameState.activeItems = gameState.activeItems.filter(item => item.id !== 'magnet');
+        }, 15000);
+    }
+
+    // 添加小狗激活函数
+    function activateDog() {
+        dog.active = true;
+        dog.x = cat.x - 100;  // 初始位置在猫咪后面
+        dog.y = cat.y;
+    }
+
+    // 修改金币收集逻辑
+    function collectCoin(coin) {
+        if (coin.collected) return;
+        
+        coin.collected = true;
+        gameState.gameCoins += 5;  // 每个金币增加5个游戏币
+        sounds.score.play();       // 播放收集音效
+        
+        // 每收集50个游戏币自动兑换为商城中的10个金币
+        if (gameState.gameCoins >= 50) {
+            gameState.gameCoins -= 50;    // 扣除50个游戏币
+            gameState.shopCoins += 10;    // 增加10个商城币
+            saveShopCoins();              // 保存商城币数量
+            
+            // 显示兑换提示
+            showExchangeNotification();
+            sounds.score.play();          // 播放兑换音效
+        }
+    }
+
+    // 修改兑换提示显示时间和位置
+    function showExchangeNotification() {
+        const notification = {
+            text: '50游戏币已兑换为10商城币！',
+            startTime: Date.now(),
+            duration: 2000  // 显示2秒
+        };
+        
+        // 将通知添加到游戏状态
+        if (!gameState.notifications) {
+            gameState.notifications = [];
+        }
+        gameState.notifications.push(notification);
+    }
+
+    // 修改商城绘制函数
+    function drawShop() {
+        if (!gameState.showShop) return;
+
+        // 绘制商城背景
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制标题和金币信息
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 40px Arial';
+        ctx.fillText('商城', canvas.width/2 - 50, 60);
+        ctx.font = 'bold 30px Arial';
+        ctx.fillText(`游戏币: ${gameState.gameCoins}/50`, 20, 60);
+        ctx.fillText(`商城币: ${gameState.shopCoins}`, 20, 100);
+        
+        // 修改兑换说明文字
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText('每收集50个游戏币自动兑换为10个商城币', canvas.width/2 - 150, 140);
+
+        // 绘制商品
+        SHOP_ITEMS.forEach((item, index) => {
+            const x = canvas.width/4;
+            const y = 180 + index * 100;
+            
+            ctx.fillStyle = gameState.shopCoins >= item.price ? 'rgba(255,255,255,0.2)' : 'rgba(255,0,0,0.2)';
+            ctx.fillRect(x, y, canvas.width/2, 80);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = '30px Arial';
+            ctx.fillText(`${item.icon} ${item.name}`, x + 20, y + 35);
+            ctx.fillText(`${item.price} 商城币`, x + 20, y + 65);
+            ctx.font = '20px Arial';
+            
+            // 为磁铁添加特殊说明
+            if (item.id === 'magnet') {
+                ctx.fillText(item.description + '（退出商城后自动使用）', x + 200, y + 50);
+            } else {
+                ctx.fillText(item.description, x + 200, y + 50);
+            }
+        });
+
+        // 绘制关闭按钮
+        ctx.fillStyle = 'white';
+        ctx.font = '30px Arial';
+        ctx.fillText('×', canvas.width - 40, 40);
+    }
+
+    // 修改暂停切换函数
+    function togglePause() {
+        // 只有在游戏运行时才能暂停
+        if (gameState.isRunning && !gameState.showShop && !gameState.showBag) {
+            gameState.isPaused = !gameState.isPaused;
             if (gameState.isPaused) {
+                // 暂停时停止游戏更新，但保持isRunning为true
                 gameState.wasRunning = true;
             } else {
+                // 取消暂停时恢复游戏
                 if (gameState.wasRunning) {
                     gameState.wasRunning = false;
                 }
             }
         }
-        return;
     }
 
-    // 检查商城按钮点击
-    if (x > canvas.width - 100 && x < canvas.width - 20 && y > 80 && y < 120) {
-        toggleShop();
-        return;
-    }
-
-    // 游戏正常点击处理
-    if (!gameState.isPaused && !gameState.showShop) {
-        if (!gameState.isRunning) {
-            startGame();
-        } else if (!cat.isJumping || cat.velocity < 0) {
-            // 根据当前速度调整跳跃力度
-            cat.velocity = cat.baseJump * (gameState.speedMultiplier ** 2);  // 使用平方关系
-            cat.isJumping = true;
-            sounds.jump.play();
-        }
-    }
-});
-
-// 修改商城切换函数
-function toggleShop() {
-    if (!gameState.showShop) {
-        // 打开商城时
-        gameState.showShop = true;
-        gameState.isRunning = false;
-    } else {
-        // 关闭商城时
-        gameState.showShop = false;
-        if (!gameState.isPaused) {
-            gameState.isRunning = true;
-            // 检查是否有磁铁道具待使用
-            if (gameState.inventory && gameState.inventory.includes('magnet')) {
-                // 使用磁铁
-                activateMagnet();
-                // 从背包中移除磁铁
-                gameState.inventory = gameState.inventory.filter(item => item !== 'magnet');
-            }
-        }
-    }
-}
-
-// 购买道具
-function buyItem(itemId) {
-    const item = SHOP_ITEMS.find(i => i.id === itemId);
-    if (!item || gameState.shopCoins < item.price) return;
-    
-    gameState.shopCoins -= item.price;
-    saveShopCoins();
-    
-    switch(itemId) {
-        case 'shield':
-            activateShield();
-            break;
-        case 'magnet':
-            // 购买磁铁时不直接激活，而是存储到背包
-            if (!gameState.inventory) {
-                gameState.inventory = [];
-            }
-            gameState.inventory.push('magnet');
-            break;
-        case 'life':
-            if (gameState.lives < 5) {
-                gameState.lives++;
-            }
-            break;
-        case 'dog':
-            activateDog();
-            break;
-    }
-}
-
-// 道具效果
-function activateShield() {
-    gameState.isInvincible = true;
-    gameState.activeItems.push({
-        id: 'shield',
-        endTime: Date.now() + 5000
-    });
-    setTimeout(() => {
-        gameState.isInvincible = false;
-        gameState.activeItems = gameState.activeItems.filter(item => item.id !== 'shield');
-    }, 5000);
-}
-
-function activateMagnet() {
-    const magnetRange = 200;  // 增加磁铁吸引范围
-    const magnetItem = {
-        id: 'magnet',
-        endTime: Date.now() + 15000  // 修改为15秒
-    };
-    gameState.activeItems.push(magnetItem);
-    
-    // 添加磁铁效果
-    const magnetEffect = setInterval(() => {
-        if (!gameState.isRunning) return;
+    // 修改星星生成函数
+    function generateStars() {
+        // 如果已经生成了3个星星，就不再生成
+        if (gameState.totalStarsGenerated >= STAR_COUNT) return;
         
-        coins.forEach(coin => {
-            if (!coin.collected) {
-                const dx = cat.x - coin.x;
-                const dy = cat.y - coin.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance < magnetRange) {
-                    // 增加吸引力
-                    coin.x += dx * 0.15;  // 增加吸引速度
-                    coin.y += dy * 0.15;
-                }
-            }
+        // 如果当前屏幕上有星星，也不生成新的
+        if (gameState.stars.length > 0) return;
+
+        // 生成一个新星星
+        const sections = [
+            { min: canvas.width + 300, max: canvas.width + 500 },
+            { min: canvas.width + 700, max: canvas.width + 900 },
+            { min: canvas.width + 1100, max: canvas.width + 1300 }
+        ];
+
+        const heightZones = [
+            { min: 150, max: canvas.height * 0.4 },
+            { min: canvas.height * 0.4, max: canvas.height * 0.7 }
+        ];
+
+        const section = sections[gameState.totalStarsGenerated];  // 每个星星使用不同的区域
+        const heightZone = heightZones[Math.floor(Math.random() * heightZones.length)];
+        
+        gameState.stars.push({
+            x: Math.random() * (section.max - section.min) + section.min,
+            y: Math.random() * (heightZone.max - heightZone.min) + heightZone.min,
+            size: STAR_SIZE,
+            collected: false,
+            rotation: Math.random() * Math.PI * 2,
+            bounceOffset: Math.random() * Math.PI * 2
         });
-    }, 16);
-
-    // 15秒后关闭效果
-    setTimeout(() => {
-        clearInterval(magnetEffect);
-        gameState.activeItems = gameState.activeItems.filter(item => item.id !== 'magnet');
-    }, 15000);
-}
-
-// 添加小狗激活函数
-function activateDog() {
-    dog.active = true;
-    dog.x = cat.x - 100;  // 初始位置在猫咪后面
-    dog.y = cat.y;
-}
-
-// 修改金币收集逻辑
-function collectCoin(coin) {
-    if (coin.collected) return;
-    
-    coin.collected = true;
-    gameState.gameCoins += 5;  // 每个金币增加5个游戏币
-    sounds.score.play();       // 播放收集音效
-    
-    // 每收集50个游戏币自动兑换为商城中的10个金币
-    if (gameState.gameCoins >= 50) {
-        gameState.gameCoins -= 50;    // 扣除50个游戏币
-        gameState.shopCoins += 10;    // 增加10个商城币
-        saveShopCoins();              // 保存商城币数量
         
-        // 显示兑换提示
-        showExchangeNotification();
-        sounds.score.play();          // 播放兑换音效
+        gameState.totalStarsGenerated++;  // 增加已生成星星计数
     }
-}
 
-// 修改兑换提示显示时间和位置
-function showExchangeNotification() {
-    const notification = {
-        text: '50游戏币已兑换为10商城币！',
-        startTime: Date.now(),
-        duration: 2000  // 显示2秒
-    };
-    
-    // 将通知添加到游戏状态
-    if (!gameState.notifications) {
-        gameState.notifications = [];
-    }
-    gameState.notifications.push(notification);
-}
+    // 添加星星绘制函数
+    function drawStar(star) {
+        ctx.save();
+        ctx.translate(star.x, star.y + Math.sin(star.bounceOffset + Date.now() * 0.003) * 5);
+        ctx.rotate(star.rotation + Date.now() * 0.001);
 
-// 修改商城绘制函数
-function drawShop() {
-    if (!gameState.showShop) return;
-
-    // 绘制商城背景
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 绘制标题和金币信息
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 40px Arial';
-    ctx.fillText('商城', canvas.width/2 - 50, 60);
-    ctx.font = 'bold 30px Arial';
-    ctx.fillText(`游戏币: ${gameState.gameCoins}/50`, 20, 60);
-    ctx.fillText(`商城币: ${gameState.shopCoins}`, 20, 100);
-    
-    // 修改兑换说明文字
-    ctx.font = 'bold 20px Arial';
-    ctx.fillText('每收集50个游戏币自动兑换为10个商城币', canvas.width/2 - 150, 140);
-
-    // 绘制商品
-    SHOP_ITEMS.forEach((item, index) => {
-        const x = canvas.width/4;
-        const y = 180 + index * 100;
-        
-        ctx.fillStyle = gameState.shopCoins >= item.price ? 'rgba(255,255,255,0.2)' : 'rgba(255,0,0,0.2)';
-        ctx.fillRect(x, y, canvas.width/2, 80);
-        
-        ctx.fillStyle = 'white';
-        ctx.font = '30px Arial';
-        ctx.fillText(`${item.icon} ${item.name}`, x + 20, y + 35);
-        ctx.fillText(`${item.price} 商城币`, x + 20, y + 65);
-        ctx.font = '20px Arial';
-        
-        // 为磁铁添加特殊说明
-        if (item.id === 'magnet') {
-            ctx.fillText(item.description + '（退出商城后自动使用）', x + 200, y + 50);
-        } else {
-            ctx.fillText(item.description, x + 200, y + 50);
-        }
-    });
-
-    // 绘制关闭按钮
-    ctx.fillStyle = 'white';
-    ctx.font = '30px Arial';
-    ctx.fillText('×', canvas.width - 40, 40);
-}
-
-// 修改暂停切换函数
-function togglePause() {
-    // 只有在游戏运行时才能暂停
-    if (gameState.isRunning && !gameState.showShop && !gameState.showBag) {
-        gameState.isPaused = !gameState.isPaused;
-        if (gameState.isPaused) {
-            // 暂停时停止游戏更新，但保持isRunning为true
-            gameState.wasRunning = true;
-        } else {
-            // 取消暂停时恢复游戏
-            if (gameState.wasRunning) {
-                gameState.wasRunning = false;
+        // 绘制五角星
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+            const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+            const x = Math.cos(angle) * star.size/2;
+            const y = Math.sin(angle) * star.size/2;
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
             }
         }
-    }
-}
+        ctx.closePath();
 
-// 修改星星生成函数
-function generateStars() {
-    // 如果已经生成了3个星星，就不再生成
-    if (gameState.totalStarsGenerated >= STAR_COUNT) return;
-    
-    // 如果当前屏幕上有星星，也不生成新的
-    if (gameState.stars.length > 0) return;
-
-    // 生成一个新星星
-    const sections = [
-        { min: canvas.width + 300, max: canvas.width + 500 },
-        { min: canvas.width + 700, max: canvas.width + 900 },
-        { min: canvas.width + 1100, max: canvas.width + 1300 }
-    ];
-
-    const heightZones = [
-        { min: 150, max: canvas.height * 0.4 },
-        { min: canvas.height * 0.4, max: canvas.height * 0.7 }
-    ];
-
-    const section = sections[gameState.totalStarsGenerated];  // 每个星星使用不同的区域
-    const heightZone = heightZones[Math.floor(Math.random() * heightZones.length)];
-    
-    gameState.stars.push({
-        x: Math.random() * (section.max - section.min) + section.min,
-        y: Math.random() * (heightZone.max - heightZone.min) + heightZone.min,
-        size: STAR_SIZE,
-        collected: false,
-        rotation: Math.random() * Math.PI * 2,
-        bounceOffset: Math.random() * Math.PI * 2
-    });
-    
-    gameState.totalStarsGenerated++;  // 增加已生成星星计数
-}
-
-// 添加星星绘制函数
-function drawStar(star) {
-    ctx.save();
-    ctx.translate(star.x, star.y + Math.sin(star.bounceOffset + Date.now() * 0.003) * 5);
-    ctx.rotate(star.rotation + Date.now() * 0.001);
-
-    // 绘制五角星
-    ctx.beginPath();
-    for (let i = 0; i < 5; i++) {
-        const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
-        const x = Math.cos(angle) * star.size/2;
-        const y = Math.sin(angle) * star.size/2;
-        if (i === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
-        }
-    }
-    ctx.closePath();
-
-    // 填充蓝色
-    ctx.fillStyle = '#4169E1';  // 皇家蓝
-    ctx.fill();
-    
-    // 添加闪光效果
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.beginPath();
-    ctx.arc(-star.size/6, -star.size/6, star.size/8, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.restore();
-}
-
-// 添加星星碰撞检测
-function checkStarCollision(star) {
-    const catHitbox = {
-        left: cat.x - cat.width/3,
-        right: cat.x + cat.width/3,
-        top: cat.y - cat.height/3,
-        bottom: cat.y + cat.height/3
-    };
-
-    const starHitbox = {
-        left: star.x - star.size/2,
-        right: star.x + star.size/2,
-        top: star.y - star.size/2,
-        bottom: star.y + star.size/2
-    };
-
-    return catHitbox.right > starHitbox.left && 
-           catHitbox.left < starHitbox.right && 
-           catHitbox.bottom > starHitbox.top && 
-           catHitbox.top < starHitbox.bottom;
-}
-
-// 修改小狗绘制函数
-function drawDog(x, y, legAngle) {
-    ctx.save();
-    ctx.translate(x, y);
-
-    // 绘制蓬松的尾巴
-    ctx.beginPath();
-    const tailWag = Math.sin(Date.now() * 0.01) * 10;
-    ctx.moveTo(-25, -5);
-    // 更蓬松的尾巴曲线
-    ctx.quadraticCurveTo(-35, -20 + tailWag, -45, -15 + tailWag);
-    ctx.quadraticCurveTo(-40, -5 + tailWag, -35, 0 + tailWag);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fill();
-    // 尾巴的毛发效果
-    ctx.strokeStyle = '#F8F8F8';
-    ctx.lineWidth = 2;
-    for(let i = 0; i < 5; i++) {
-        ctx.beginPath();
-        ctx.moveTo(-30 - i * 3, -10 + tailWag);
-        ctx.lineTo(-35 - i * 2, -15 + tailWag);
-        ctx.stroke();
-    }
-
-    // 绘制蓬松的身体
-    const bodyGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 30);
-    bodyGradient.addColorStop(0, '#FFFFFF');
-    bodyGradient.addColorStop(1, '#F0F0F0');
-    ctx.fillStyle = bodyGradient;
-    // 更大更蓬松的身体
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 30, 25, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 绘制毛发效果
-    ctx.strokeStyle = '#F8F8F8';
-    ctx.lineWidth = 2;
-    for(let i = 0; i < 8; i++) {
-        const angle = (i * Math.PI) / 4;
-        ctx.beginPath();
-        ctx.moveTo(
-            Math.cos(angle) * 25,
-            Math.sin(angle) * 20
-        );
-        ctx.lineTo(
-            Math.cos(angle) * 32,
-            Math.sin(angle) * 26
-        );
-        ctx.stroke();
-    }
-
-    // 绘制萨摩耶特征的头部
-    const headGradient = ctx.createRadialGradient(25, -10, 0, 25, -10, 22);
-    headGradient.addColorStop(0, '#FFFFFF');
-    headGradient.addColorStop(1, '#F0F0F0');
-    ctx.fillStyle = headGradient;
-    ctx.beginPath();
-    ctx.arc(25, -10, 22, 0, Math.PI * 2); // 更大的头部
-    ctx.fill();
-
-    // 绘制标志性的萨摩耶微笑
-    ctx.beginPath();
-    ctx.moveTo(35, -8);
-    ctx.quadraticCurveTo(40, -5, 45, -8);
-    ctx.strokeStyle = '#FFB6C1';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // 绘制特征性的三角形耳朵
-    // 左耳
-    ctx.beginPath();
-    ctx.moveTo(15, -25);
-    ctx.lineTo(10, -40);
-    ctx.lineTo(25, -25);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fill();
-    // 右耳
-    ctx.beginPath();
-    ctx.moveTo(35, -25);
-    ctx.lineTo(30, -40);
-    ctx.lineTo(45, -25);
-    ctx.fill();
-
-    // 绘制大眼睛
-    // 白色眼球
-    ctx.fillStyle = 'white';
-    ctx.beginPath();
-    ctx.arc(20, -12, 6, 0, Math.PI * 2);
-    ctx.arc(30, -12, 6, 0, Math.PI * 2);
-    ctx.fill();
-    // 黑色瞳孔
-    ctx.fillStyle = 'black'; // 萨摩耶通常是黑色眼睛
-    ctx.beginPath();
-    ctx.arc(20, -12, 3, 0, Math.PI * 2);
-    ctx.arc(30, -12, 3, 0, Math.PI * 2);
-    ctx.fill();
-    // 眼睛高光
-    ctx.fillStyle = 'white';
-    ctx.beginPath();
-    ctx.arc(21, -13, 1.5, 0, Math.PI * 2);
-    ctx.arc(31, -13, 1.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 绘制黑色鼻子（萨摩耶特征）
-    ctx.fillStyle = 'black';
-    ctx.beginPath();
-    ctx.arc(40, -8, 4, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 绘制蓬松的腿
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 8; // 更粗的腿部
-    const frontLegSwing = Math.sin(legAngle) * 8;
-    const backLegSwing = Math.sin(legAngle + Math.PI) * 8;
-
-    // 前腿
-    drawFluffyLeg(10, 15, 10 + frontLegSwing, 30);
-    drawFluffyLeg(20, 15, 20 - frontLegSwing, 30);
-    // 后腿
-    drawFluffyLeg(-10, 15, -10 + backLegSwing, 30);
-    drawFluffyLeg(-20, 15, -20 - backLegSwing, 30);
-
-    ctx.restore();
-}
-
-// 添加蓬松腿部绘制辅助函数
-function drawFluffyLeg(startX, startY, endX, endY) {
-    // 主要腿部
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.stroke();
-
-    // 添加毛发效果
-    ctx.strokeStyle = '#F8F8F8';
-    ctx.lineWidth = 2;
-    const dx = endX - startX;
-    const dy = endY - startY;
-    const angle = Math.atan2(dy, dx);
-    
-    for(let i = 0; i < 4; i++) {
-        const t = i / 3;
-        const x = startX + dx * t;
-        const y = startY + dy * t;
+        // 填充蓝色
+        ctx.fillStyle = '#4169E1';  // 皇家蓝
+        ctx.fill();
         
+        // 添加闪光效果
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(
-            x + Math.cos(angle + Math.PI/2) * 5,
-            y + Math.sin(angle + Math.PI/2) * 5
-        );
-        ctx.stroke();
-        
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(
-            x + Math.cos(angle - Math.PI/2) * 5,
-            y + Math.sin(angle - Math.PI/2) * 5
-        );
-        ctx.stroke();
-    }
-}
-
-// 添加背包按钮绘制函数
-function drawBagButton() {
-    // 绘制背包按钮背景
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.fillRect(20, canvas.height - 80, 100, 40);
-    
-    // 绘制背包图标和文字
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 20px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText('🎒 背包', 35, canvas.height - 50);
-}
-
-// 添加背包界面绘制函数
-function drawBag() {
-    if (!gameState.showBag) return;
-
-    // 绘制背包背景
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 绘制标题
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 40px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('皮肤背包', canvas.width/2, 60);
-
-    // 显示商城币
-    ctx.font = 'bold 25px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText(`商城币: ${gameState.shopCoins}`, 20, 100);
-
-    // 绘制皮肤列表
-    SKINS.forEach((skin, index) => {
-        const x = canvas.width/4;
-        const y = 150 + index * 100;
-        
-        // 皮肤框
-        ctx.fillStyle = skin.id === gameState.currentSkin ? 
-            'rgba(0, 255, 0, 0.2)' : 'rgba(255, 255, 255, 0.2)';
-        ctx.fillRect(x, y, canvas.width/2, 80);
-
-        // 皮肤预览
-        ctx.fillStyle = skin.color;
-        ctx.beginPath();
-        ctx.arc(x + 40, y + 40, 30, 0, Math.PI * 2);
+        ctx.arc(-star.size/6, -star.size/6, star.size/8, 0, Math.PI * 2);
         ctx.fill();
 
-        // 皮肤信息
-        ctx.fillStyle = 'white';
-        ctx.font = '25px Arial';
-        ctx.fillText(skin.name, x + 90, y + 35);
-        ctx.font = '20px Arial';
-        ctx.fillText(skin.description, x + 90, y + 60);
+        ctx.restore();
+    }
 
-        // 状态/价格
-        if (gameState.unlockedSkins.includes(skin.id)) {
-            if (skin.id === gameState.currentSkin) {
-                ctx.fillText('使用中', x + 300, y + 45);
-            } else {
-                ctx.fillText('点击使用', x + 300, y + 45);
-            }
-        } else {
-            ctx.fillText(`${skin.price} 商城币`, x + 300, y + 45);
+    // 添加星星碰撞检测
+    function checkStarCollision(star) {
+        const catHitbox = {
+            left: cat.x - cat.width/3,
+            right: cat.x + cat.width/3,
+            top: cat.y - cat.height/3,
+            bottom: cat.y + cat.height/3
+        };
+
+        const starHitbox = {
+            left: star.x - star.size/2,
+            right: star.x + star.size/2,
+            top: star.y - star.size/2,
+            bottom: star.y + star.size/2
+        };
+
+        return catHitbox.right > starHitbox.left && 
+               catHitbox.left < starHitbox.right && 
+               catHitbox.bottom > starHitbox.top && 
+               catHitbox.top < starHitbox.bottom;
+    }
+
+    // 修改小狗绘制函数
+    function drawDog(x, y, legAngle) {
+        ctx.save();
+        ctx.translate(x, y);
+
+        // 绘制蓬松的尾巴
+        ctx.beginPath();
+        const tailWag = Math.sin(Date.now() * 0.01) * 10;
+        ctx.moveTo(-25, -5);
+        // 更蓬松的尾巴曲线
+        ctx.quadraticCurveTo(-35, -20 + tailWag, -45, -15 + tailWag);
+        ctx.quadraticCurveTo(-40, -5 + tailWag, -35, 0 + tailWag);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fill();
+        // 尾巴的毛发效果
+        ctx.strokeStyle = '#F8F8F8';
+        ctx.lineWidth = 2;
+        for(let i = 0; i < 5; i++) {
+            ctx.beginPath();
+            ctx.moveTo(-30 - i * 3, -10 + tailWag);
+            ctx.lineTo(-35 - i * 2, -15 + tailWag);
+            ctx.stroke();
         }
-    });
 
-    // 绘制关闭按钮
-    ctx.fillStyle = 'white';
-    ctx.font = '30px Arial';
-    ctx.fillText('×', canvas.width - 40, 40);
+        // 绘制蓬松的身体
+        const bodyGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 30);
+        bodyGradient.addColorStop(0, '#FFFFFF');
+        bodyGradient.addColorStop(1, '#F0F0F0');
+        ctx.fillStyle = bodyGradient;
+        // 更大更蓬松的身体
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 30, 25, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 绘制毛发效果
+        ctx.strokeStyle = '#F8F8F8';
+        ctx.lineWidth = 2;
+        for(let i = 0; i < 8; i++) {
+            const angle = (i * Math.PI) / 4;
+            ctx.beginPath();
+            ctx.moveTo(
+                Math.cos(angle) * 25,
+                Math.sin(angle) * 20
+            );
+            ctx.lineTo(
+                Math.cos(angle) * 32,
+                Math.sin(angle) * 26
+            );
+            ctx.stroke();
+        }
+
+        // 绘制萨摩耶特征的头部
+        const headGradient = ctx.createRadialGradient(25, -10, 0, 25, -10, 22);
+        headGradient.addColorStop(0, '#FFFFFF');
+        headGradient.addColorStop(1, '#F0F0F0');
+        ctx.fillStyle = headGradient;
+        ctx.beginPath();
+        ctx.arc(25, -10, 22, 0, Math.PI * 2); // 更大的头部
+        ctx.fill();
+
+        // 绘制标志性的萨摩耶微笑
+        ctx.beginPath();
+        ctx.moveTo(35, -8);
+        ctx.quadraticCurveTo(40, -5, 45, -8);
+        ctx.strokeStyle = '#FFB6C1';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 绘制特征性的三角形耳朵
+        // 左耳
+        ctx.beginPath();
+        ctx.moveTo(15, -25);
+        ctx.lineTo(10, -40);
+        ctx.lineTo(25, -25);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fill();
+        // 右耳
+        ctx.beginPath();
+        ctx.moveTo(35, -25);
+        ctx.lineTo(30, -40);
+        ctx.lineTo(45, -25);
+        ctx.fill();
+
+        // 绘制大眼睛
+        // 白色眼球
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(20, -12, 6, 0, Math.PI * 2);
+        ctx.arc(30, -12, 6, 0, Math.PI * 2);
+        ctx.fill();
+        // 黑色瞳孔
+        ctx.fillStyle = 'black'; // 萨摩耶通常是黑色眼睛
+        ctx.beginPath();
+        ctx.arc(20, -12, 3, 0, Math.PI * 2);
+        ctx.arc(30, -12, 3, 0, Math.PI * 2);
+        ctx.fill();
+        // 眼睛高光
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(21, -13, 1.5, 0, Math.PI * 2);
+        ctx.arc(31, -13, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 绘制黑色鼻子（萨摩耶特征）
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(40, -8, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 绘制蓬松的腿
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 8; // 更粗的腿部
+        const frontLegSwing = Math.sin(legAngle) * 8;
+        const backLegSwing = Math.sin(legAngle + Math.PI) * 8;
+
+        // 前腿
+        drawFluffyLeg(10, 15, 10 + frontLegSwing, 30);
+        drawFluffyLeg(20, 15, 20 - frontLegSwing, 30);
+        // 后腿
+        drawFluffyLeg(-10, 15, -10 + backLegSwing, 30);
+        drawFluffyLeg(-20, 15, -20 - backLegSwing, 30);
+
+        ctx.restore();
+    }
+
+    // 添加蓬松腿部绘制辅助函数
+    function drawFluffyLeg(startX, startY, endX, endY) {
+        // 主要腿部
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+
+        // 添加毛发效果
+        ctx.strokeStyle = '#F8F8F8';
+        ctx.lineWidth = 2;
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const angle = Math.atan2(dy, dx);
+        
+        for(let i = 0; i < 4; i++) {
+            const t = i / 3;
+            const x = startX + dx * t;
+            const y = startY + dy * t;
+            
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(
+                x + Math.cos(angle + Math.PI/2) * 5,
+                y + Math.sin(angle + Math.PI/2) * 5
+            );
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(
+                x + Math.cos(angle - Math.PI/2) * 5,
+                y + Math.sin(angle - Math.PI/2) * 5
+            );
+            ctx.stroke();
+        }
+    }
+
+    // 添加背包按钮绘制函数
+    function drawBagButton() {
+        // 绘制背包按钮背景
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.fillRect(20, canvas.height - 80, 100, 40);
+        
+        // 绘制背包图标和文字
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText('🎒 背包', 35, canvas.height - 50);
+    }
+
+    // 添加背包界面绘制函数
+    function drawBag() {
+        if (!gameState.showBag) return;
+
+        // 绘制背包背景
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制标题
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 40px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('皮肤背包', canvas.width/2, 60);
+
+        // 显示商城币
+        ctx.font = 'bold 25px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(`商城币: ${gameState.shopCoins}`, 20, 100);
+
+        // 绘制皮肤列表
+        SKINS.forEach((skin, index) => {
+            const x = canvas.width/4;
+            const y = 150 + index * 100;
+            
+            // 皮肤框
+            ctx.fillStyle = skin.id === gameState.currentSkin ? 
+                'rgba(0, 255, 0, 0.2)' : 'rgba(255, 255, 255, 0.2)';
+            ctx.fillRect(x, y, canvas.width/2, 80);
+
+            // 皮肤预览
+            ctx.fillStyle = skin.color;
+            ctx.beginPath();
+            ctx.arc(x + 40, y + 40, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 皮肤信息
+            ctx.fillStyle = 'white';
+            ctx.font = '25px Arial';
+            ctx.fillText(skin.name, x + 90, y + 35);
+            ctx.font = '20px Arial';
+            ctx.fillText(skin.description, x + 90, y + 60);
+
+            // 状态/价格
+            if (gameState.unlockedSkins.includes(skin.id)) {
+                if (skin.id === gameState.currentSkin) {
+                    ctx.fillText('使用中', x + 300, y + 45);
+                } else {
+                    ctx.fillText('点击使用', x + 300, y + 45);
+                }
+            } else {
+                ctx.fillText(`${skin.price} 商城币`, x + 300, y + 45);
+            }
+        });
+
+        // 绘制关闭按钮
+        ctx.fillStyle = 'white';
+        ctx.font = '30px Arial';
+        ctx.fillText('×', canvas.width - 40, 40);
+    }
+
+    // 初始绘制
+    draw();
 }
 
-// 添加游戏启动代码
-window.onload = function() {
-    // 确保canvas和上下文都已经准备好
-    if (canvas && ctx) {
-        startGame();
-    } else {
-        console.error('Canvas或上下文未准备好');
+// 导出游戏对象供其他模块使用
+window.game = {
+    init: initGame,
+    start: () => {
+        // 游戏启动逻辑
+    },
+    resize: (width, height) => {
+        // 处理画布大小变化
     }
 }; 
