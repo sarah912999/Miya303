@@ -123,11 +123,11 @@ function initGame() {
         shopCoins: 0,    // 商城中的金币
         wasRunning: false,  // 添加新属性，记录商城打开前的游戏状态
         lastGameWon: false,    // 记录上一局是否胜利
-        speedMultiplier: 1,    // 游戏速度倍数
+        speedMultiplier: 1.0,    // 当前速度倍数
         currentLevel: 1,        // 添加当前关卡记录
         stars: [],            // 星星数组
         totalStarsGenerated: 0,  // 添加总星星计数
-        speedBoosts: 0,        // 当前获得的加速数量
+        speedBoosts: 0,        // 收集的加速星星数量
         notifications: [],      // 添加通知数组
         showBag: false,        // 背包显示状态
         currentSkin: 'default', // 当前使用的皮肤
@@ -864,6 +864,7 @@ function initGame() {
         // 显示当前速度倍数
         ctx.fillStyle = 'black';
         ctx.font = 'bold 30px Arial';
+        ctx.textAlign = 'left';
         ctx.fillText(`速度: ${gameState.speedMultiplier.toFixed(1)}x`, 20, 200);
 
         // 绘制通知
